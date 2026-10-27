@@ -1,8 +1,9 @@
 # HANDOFF-M6 — consumers 矩阵 + 发布（收官交接单）
 
 > 上一棒：**M5 container 校验器（✅）**。本棒：**M6 consumers 矩阵 + 发布**。
-> **本棒状态：本地交付完成（测试 222 项 + 三道门全绿）；发布动作（commit / tag / 公开仓库 / push /
-> Release）未执行** → 三处状态副本的 M6 **仍是 ⬜**。下一棒（或本棒授权后）从 §三 #1 接着走。
+> **本棒状态：已完成并发布** —— 本地交付（222 项测试 + 三道门全绿）+ 公开仓库 + 两个 tag/Release
+> （`v0.5.0` 首发、`v0.5.1` CI 配置修复）+ 三处状态副本 M6 ✅。发布事实见 §一 / §二 与
+> `plan/RELEASE-M6.md` §二。
 
 ## 一、当前进度 + 证据
 
@@ -23,17 +24,23 @@
 | 人读矩阵表（文本模式） | `report.render_text`；`test_text_output_renders_matrix` |
 | 单元测试 | `py -3.12 -m unittest discover -s tests -t .` → **222 tests OK** |
 | 三道门 | `check_sprint_layout` / `check_desensitized` / `verify_gates`（18/18）→ **全绿** |
-| 发布留档 | `plan/RELEASE-M6.md` §一 tag 前事实 / §二 tag 后待回填 / §三 出口门对账（8 条） |
+| 发布留档 | `plan/RELEASE-M6.md` §一 tag 前事实 / §二 tag 后回填 / §三 出口门对账（8 条） |
+| 公开仓库 | <https://github.com/yuluo554/10-27-imageoracle>（`gh repo create --public`） |
+| tag + Release | `v0.5.0`（`312d8ea`）与 `v0.5.1`（CI 修复）；两个 Release 正文均含附件 sha256 |
+| 附件可复现 | `git archive --format=tar.gz v0.5.0` 两次构建逐字节相同（`cmp`）；v0.5.0 附件 215387 B，sha256 `30351fed…4cf15c` |
+| CI 首推验证 | `main` run `40530725648` = **7/7 job 绿**；`v0.5.0` tag run `40530040806` = 失败（配置缺陷，已由 `v0.5.1` 修复，历史不改写） |
 
-**诚实口径**：以上全部是**本地等价校验**。仓库**无远端**，**一次 CI 都没跑过**；
-发布动作**一步都没执行**——任何文档都不得写"CI 绿"或"已发布"。
+**诚实口径**：本地等价校验（全量 `unittest` + 两道门 + 变异验证）**与**首推后的真实 CI 都已有记录；
+`v0.5.0` 的 tag run 是**红的**（三处 CI 配置缺陷，首推才暴露），修复在 `b92a767`（只动 `.github/`）
+并由 `v0.5.1` 承载。**不得把 v0.5.0 的 tag run 写成绿**；也不得删除那条失败记录。
 
 ## 二、当前事实·状态不变量（下一棒动手前必须知道）
 
-1. **M6 是末棒 + 发布棒**：本地交付已完，**发布未执行**。`plan/05` §三 的 7 步顺序不可交换；
-   `plan/RELEASE-M6.md` §二 是发布事实的唯一回填处。
-2. **三处状态副本（`plan/00` 里程碑表 / `plan/05` §二 / `README.md` 状态行）此刻都是 M6 ⬜**。
-   翻 ✅ 的前置条件 = tag + Release + 附件 sha256 落进 §二；否则就是"把未执行写成已完成"（红线）。
+1. **M6 已发布（末棒）**：`plan/05` §三 的 7 步顺序不可交换；`plan/RELEASE-M6.md` §二 是发布事实的
+   唯一回填处。**已公开的 tag / Release / run 不删不改写**——`v0.5.0` 的失败 run 是记录的一部分。
+2. **三处状态副本（`plan/00` 里程碑表 / `plan/05` §二 / `README.md` 状态行）此刻都是 M6 ✅**，
+   与 `plan/RELEASE-M6.md` §二 的回填在同一个提交里完成。后续若再发版本，同样"发布后翻状态"、
+   不在 tag 之前把未执行的写成已完成。
 3. **`consumers` 只出 `info` finding**，风险清单的 `severity`（`high/medium/low/unknown`）
    **不进 `exit_code_for`**。理由写在 `data/README` §8.9 末段：它预言"你若跑某条命令会发生什么"，
    不是文件缺陷；且 `always` 触发的风险会让每张图都 exit 1。
@@ -63,21 +70,21 @@
 14. **假阳性代价与不可判项全部显式**：`consumers` 不引入新的启发式；M5 的 `unit_mismatch`
     假阳性（§8.3）、M3 条件 3 的假阳性（§8.6）原样保留，不得在本棒"顺手收紧"。
 
-## 三、下一棒待办（发布 + 后续）
+## 三、发布已执行 + 后续可选待办
 
-| # | 待办 | 完成判据 |
+发布动作（`plan/05` §三 的 7 步）**已全部执行**，事实见 `plan/RELEASE-M6.md` §二。剩下的都是**增强项**：
+
+| # | 待办（可选） | 完成判据 |
 |---|---|---|
-| 1 | 取得发布授权后：`git add -A` → `commit`（含本棒全部改动） | `git status` 干净；提交信息点明 M6 |
-| 2 | `git tag -a v0.5.0 -m "…"` | `git tag -l v0.5.0` 有输出；tag 指向该提交 |
-| 3 | 建 GitHub 公开仓库 `yuluo554/10-27-imageoracle` 并 `push origin main` + `push origin v0.5.0` | `gh repo view` 可读；两个 ref 都在远端 |
-| 4 | `git archive --format=tar.gz v0.5.0` 出源码包到中立目录，复算 sha256 | 重建一次 `cmp` 逐字节相等（`plan/RELEASE-M6.md` §三 第 1 行） |
-| 5 | `gh release create v0.5.0 <tarball> --notes-file <留档正文>` | 附件 sha256 **只**出现在 Release 正文与 §二 |
-| 6 | 回填 `plan/RELEASE-M6.md` §二（tag / run id / 附件 sha256）+ 三处状态副本 M6 → ✅ | 布局门 `STATUS` + `RELEASE` PASS；`git log --oneline v0.5.0..HEAD` 只含非交付面 |
-| 7 | 首推后回填 CI run id（branch + tag 两条）到 `plan/05` §四 #1 与留档 §二 #7 | 两条 run 都绿，且 run id 是**真实**的 |
+| 1 | 外部工具链交叉复核（真 exiftool / jpegtran / oxipng 跑一遍 fixture） | 补 `docs/cross-check.md`；本机无该工具链，非阻塞（`plan/06` §二） |
+| 2 | 补工具文档 URL（exiftran / oxipng / jpegtran / libvips 参数页，见 §9 #13） | 取到后把对应行从 `spec`/`hn-quote` 升级为 `tool-doc`（判据不变） |
+| 3 | macOS Preview / Windows 照片 / Firefox 的第一方行为文档（§9 #11 / #12） | 取到后把矩阵格从 `unknown` 改成确定值，并把行置信度从 `gray` 升格 |
+| 4 | 下次发版本的流程演练 | 版本号两处 + README 行 + CHANGELOG；发布后翻状态、回填 §二（同 v0.5.1 模式） |
 
-**不要做**：不要把"未实跑 CI"写成"CI 绿"；不要在 tag 之后改 `src/`/`pyproject.toml`；
+**不要做**：不要在 tag 之后改 `src/`/`pyproject.toml`（要改就发新版本）；
 不要给取不到页面的工具编 `tool-doc` URL；不要把 `unknown` 格按常识补成 `yes`；
-不要让风险清单的 severity 折进退出码（那要先改 §8.9 与 `cli.exit_code_for`）。
+不要让风险清单的 severity 折进退出码（那要先改 §8.9 与 `cli.exit_code_for`）；
+不要删改已公开的失败 run 记录。
 
 ## 四、既定口径清单（K 编号，动了会打挂测试）
 
@@ -139,8 +146,9 @@
 - [x] `py -3.12 -m unittest discover -s tests -t .` 全绿（222 项）
 - [x] 布局门 + 脱敏门 + 门自证三条命令全绿（18/18）
 - [x] `plan/RELEASE-M6.md` 三节齐；§三 出口门对账 8 条
-- [ ] **tag + Release + 附件 sha256**（未执行；见 §三 #1–#6）
-- [ ] 三处状态副本 M6 → ✅（**同上，发布后才翻**）
+- [x] **tag + Release + 附件 sha256**（v0.5.0 首发、v0.5.1 CI 修复；sha256 只写 Release 正文）
+- [x] **CI 首推验证**（`main` 7/7 绿；v0.5.0 的 tag run 红 → `v0.5.1` 修复，历史保留）
+- [x] 三处状态副本 M6 → ✅（与 §二 回填同一个提交）
 - [x] 收官交接单七节齐（本文件）
 
 ## 七、关键命令速查
@@ -176,4 +184,4 @@ $env:PYTHONPATH="src"; py -3.12 -m imageoracle --version
 ```
 
 > **M6 出口门原文**（`plan/05` §二）：每行有 evidence（`selftest_evidence_complete` 绿）；
-> ≥4 条加工命令 diff；tag + Release + 留档。**前两条已达成，第三条未执行。**
+> ≥4 条加工命令 diff；tag + Release + 留档。**三条全部达成**（发布事实见 `plan/RELEASE-M6.md` §二）。

@@ -56,7 +56,7 @@ PYTHONPATH=src py -3.12 -m imageoracle container --json path/to/anim.apng       
 PYTHONPATH=src py -3.12 -m imageoracle consumers --json path/to/photo.jpg       # M6 已实现：9×6 消费者矩阵
 ```
 
-退出码：`0` 无风险 / `1` 有 warning / `2` 有 error 或不可判 / `3` 输入不可解析。
+退出码：`0` 无风险 / `1` 有 warning / `2` 有 error 或不可判 / `3` 输入不可解析。发布：<https://github.com/yuluo554/10-27-imageoracle/releases>。
 口径唯一定义处：`data/README.md` §8.5。
 
 ## 开发
@@ -93,9 +93,9 @@ py -3.12 fixtures/gen_all.py --check   # 只校验：四族内存重生成 vs ma
 | M3 | ✅ | 双重旋转探测器（IFD1 未同步 / XMP 残留 / 大边启发式，本地等价校验） |
 | M4 | ✅ | `color` 体检器（ICC 载体 + 128B 头 + 默认假设表 7 行，本地等价校验） |
 | M5 | ✅ | `container` 校验器（PNG/APNG/WebP/GIF/JPEG 结构 + 帧时长归一化，本地等价校验） |
-| M6 | ⬜ | `consumers` 矩阵（本地交付完成，见 `plan/RELEASE-M6.md`）；**发布动作未执行**（未建远端） |
+| M6 | ✅ | `consumers` 矩阵 + 发布（v0.5.0 首发、v0.5.1 CI 修复；留档见 `plan/RELEASE-M6.md`） |
 
-版本：`0.5.0`（未发布）。CI：工作流已就位，**未接远端，待首推验证**。
+版本：`0.5.1`。CI：已接远端，`main` 上 7/7 job 全绿（run `40530725648`）；v0.5.0 的 tag run 失败经过与修复记在 `plan/RELEASE-M6.md` §二。
 
 ## 许可
 

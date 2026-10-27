@@ -285,7 +285,16 @@ def layout_cases(results: list[tuple[bool, str]]) -> None:
         handoff = ROOT / handoff_rel
         if handoff.is_file():
             text = handoff.read_text(encoding="utf-8")
-            section = next((s for s in ("## 三、下一棒待办", "## 三、待办") if s in text), None)
+            # 锚"## 三、…待办"这一节（不写死整句标题：末棒改写成"发布已执行 + 后续可选待办"后，
+            # 旧的全等匹配会让 L5 变成 SKIP —— 变红判据静默失效就是假门族的一种）
+            section = next(
+                (
+                    line
+                    for line in text.splitlines()
+                    if line.startswith("## 三、") and "待办" in line
+                ),
+                None,
+            )
             if section:
                 results.append(
                     expect(

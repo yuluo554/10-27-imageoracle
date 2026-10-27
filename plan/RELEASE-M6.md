@@ -26,19 +26,34 @@
 ## 二、tag 后追加
 
 > 本节在发布动作执行时逐行回填；未执行的项保持 ⬜（**不许把未执行写成已完成**）。
+> 已公开的历史**不删不改写**：v0.5.0 的 tag run 失败原样留在下面。
 
 | 步骤 | 事实 | 状态 |
 |---|---|---|
-| 1. `commit` | 待执行（工作区当前未提交） | ⬜ |
-| 2. `git tag -a v0.5.0` | 待执行 | ⬜ |
-| 3. 建 GitHub 公开仓库（`yuluo554/10-27-imageoracle`） | 待执行（`gh auth status` 已登录 `yuluo554`，scope 含 `repo`） | ⬜ |
-| 4. `git push origin main` / `git push origin v0.5.0` | 待执行 | ⬜ |
-| 5. `git archive --format=tar.gz v0.5.0` → 附件 | 待执行；产出后在此写 **sha256**（只写 Release 正文） | ⬜ |
-| 6. `gh release create v0.5.0 <tarball> --notes-file …` | 待执行 | ⬜ |
-| 7. Actions run id（branch + tag 两条） | 待首推后回填真实 run id（当前 `plan/05` §四 #1 = 未接远端） | ⬜ |
-| 8. `git log --oneline v0.5.0..HEAD` 逐条核对 | 待发布后执行：只允许非交付面（`plan/`、`docs/`、`tests/`、`tools/`、`README.md`、`AGENTS.md`） | ⬜ |
+| 1. `commit` | `312d8ea`（M1–M6 交付，48 文件 / +8200 行）；`b92a767`（CI 配置修复，仅 `.github/`）；`<v0.5.1>`（版本与留档，本提交） | ✅ |
+| 2. `git tag -a` | `v0.5.0` → `312d8ea`；`v0.5.1` → `<v0.5.1>`（含 CI 修复） | ✅ |
+| 3. 建 GitHub 公开仓库 | <https://github.com/yuluo554/10-27-imageoracle>（`gh repo create --public`） | ✅ |
+| 4. `push` | `origin/main`（`312d8ea`→`b92a767`→…），`origin/v0.5.0`，`origin/v0.5.1` | ✅ |
+| 5. `git archive` 附件 | `v0.5.0`：`imageoracle-v0.5.0.tar.gz`，**215387 字节**，sha256 `30351fed8c7b77e1cd817d36999dab029effd5dedf69a78a1bcc476e5b4cf15c`（两次构建 `cmp` 逐字节相同）；`v0.5.1`：见下一行回填 | ✅ / ⬜ |
+| 5b. v0.5.1 附件 sha256 | ⬜ **tag 之后回填**（该值不能出现在 tag 树内，自指失效） | ⬜ |
+| 6. `gh release create` | `v0.5.0` → <https://github.com/yuluo554/10-27-imageoracle/releases/tag/v0.5.0>（正文含附件 sha256）；`v0.5.1` → 见 6b | ✅ / ⬜ |
+| 6b. v0.5.1 Release | ⬜ **tag 之后回填 URL**；并给 v0.5.0 的正文加一行"已被 v0.5.1 取代（仅 CI 配置修复，`src/` 未变）" | ⬜ |
+| 7. Actions run id | **main**：`40530041670` = **failure**（首推，暴露三处配置缺陷）；`40530725648` = **success（7/7 job）**。**tag v0.5.0**：`40530040806` = **failure**（同上，tag 树内是旧版 `ci.yml`）。**tag v0.5.1**：⬜ 回填 | ⬜ v0.5.1 |
+| 8. `git log --oneline v0.5.1..HEAD` 逐条核对 | 只允许非交付面（`plan/`、`docs/`、`tests/`、`tools/`、`README.md`、`AGENTS.md`）；`CHANGELOG.md` 按"文档面"处置并在提交信息里写明 | ⬜ 待回填提交后核对 |
 
-**发布后必做的一步**：三处状态副本 M6 → ✅ 与本节回填**同一个提交**（`plan/` 与 `README.md`
+**首推暴露的三处 CI 配置缺陷（修复提交 `b92a767`，只动 `.github/`）**
+
+1. `gates-and-tests` 的 CLI smoke 报 `No module named imageoracle` —— 本仓是 `src` 布局、不装包
+   → job 级 `PYTHONPATH=src`；
+2. `windows-latest` 上门的四字节中文输出触发 `UnicodeEncodeError: 'charmap'` →
+   `PYTHONUTF8=1` + `PYTHONIOENCODING=utf-8`；
+3. 零依赖断言把 `__main__`（解释器自身）与 `_distutils_hack`（setuptools site hook，3.10 出现）
+   当成第三方 → 改用 `python -S` 并显式排除 `__main__`；offline 镜像补 `ENV PYTHONPATH=/work/src`。
+
+→ 这就是 `plan/05` §四 #1 写"CI 待首推验证"的理由：**本地全绿不等于 CI 全绿**，首推才把
+"配置面"的缺陷炸出来。v0.5.1 是这个修复的载体；`src/`、`pyproject.toml` 的代码面与 v0.5.0 相同。
+
+**发布后必做的一步（已做）**：三处状态副本 M6 → ✅ 与本节回填同一个提交（`plan/` 与 `README.md`
 属于允许的 POST_TAG 面）。
 
 ## 三、第 7 阶段出口门覆盖对账

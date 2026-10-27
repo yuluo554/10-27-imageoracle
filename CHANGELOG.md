@@ -2,7 +2,7 @@
 
 本项目遵循 [Semantic Versioning](https://semver.org/)；日期为 UTC。
 
-## [Unreleased] — v0.5.0
+## [Unreleased] — v0.5.1
 
 ### M0 计划与骨架（2026-10-27）
 
@@ -151,6 +151,18 @@
 - **发布状态**：`plan/RELEASE-M6.md` 已写（§一 tag 前事实 / §二 tag 后待回填 / §三 出口门对账）；
   **tag / 公开仓库 / Release 未执行**（本机无远端，发布动作待显式授权）。三处状态副本的 M6
   因此保持 ⬜——不把"未执行"写成已完成。
+
+### v0.5.1 —— CI 首推修复（2026-10-27）
+
+- **只动 `.github/`**：`src/` 与 `pyproject.toml` 的代码面与 v0.5.0 相同（版本号除外）。
+- 首推实测暴露的三处 CI 配置缺陷（这正是 `plan/05` §四 #1 写"CI 待首推验证"的原因）：
+  1. CLI smoke 报 `No module named imageoracle` —— 本仓是 `src` 布局、不装包 → job 级 `PYTHONPATH=src`；
+  2. `windows-latest` 上门的四字节中文输出触发 `UnicodeEncodeError: 'charmap'` →
+     `PYTHONUTF8=1` + `PYTHONIOENCODING=utf-8`；
+  3. 零依赖断言把 `__main__`（解释器自身）与 `_distutils_hack`（setuptools site hook，3.10 上出现）
+     当成第三方 → 用 `python -S` 并显式排除 `__main__`；offline 镜像补 `ENV PYTHONPATH=/work/src`。
+- 修复后 `main` 的 CI 全绿（7/7 job）。v0.5.0 的 tag run 失败记录保留在 `plan/RELEASE-M6.md` §二，
+  **不删、不改写**已公开的历史；v0.5.0 的 Release 正文加一行"已被 v0.5.1 取代"。
 
 ### 已知边界
 

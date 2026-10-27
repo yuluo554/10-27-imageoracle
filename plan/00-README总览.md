@@ -85,6 +85,7 @@
 | 9 条 0 结果检索 | `gh api` search/repositories，窗口 2026-10-27T10:56Z–11:17Z | ⬜ 软论据（可复现但非强论据） |
 | $3,000 悬赏 | margelo/react-native-vision-camera#1891 | ✅ |
 | image-size 是否应用 orientation | 原文未取 | ⬜ |
+| 发布物可安装可跑（公开仓库 + Release 附件 sha256） | v0.5.0 / v0.5.1 两个 tag 的 Release 正文均含附件 sha256；`git archive` 与附件逐字节相同（`cmp` 两次构建） | ✅ |
 | consumers 矩阵每行有依据（题目 M5 出口门） | `tests/test_m6_consumers.py` 逐格对账 §1.13/§8.9 + `selftest_evidence_complete`；2 行 `tool-doc` 带已复核 URL（§3.1） | ✅ |
 | Safari PNG `iCCP` 行为 | lr0 单来源 | ⬜ |
 
@@ -102,7 +103,7 @@
 | M3 | 双重旋转探测器（题目 M2）：IFD1≠IFD0 / XMP 冲突 / 宽高启发式（只出 `suspicion`） | 复现 sharp #4585（EXIF=1、XMP=N）与 jpegtran `-copy all`（IFD1 未同步）；`certain`/`heuristic` 分列 | ✅ |
 | M4 | `color` 体检器（题目 M3）：ICC 存在性 + 128B 头逐字段 + `iCCP↔sRGB` + 默认假设表 | lr0 形态复现；截断/`size` 错/`acsp` 坏三类各命中；默认假设表逐行带 `source` | ✅ |
 | M5 | `container` 校验器（题目 M4）：PNG chunk 顺序/CRC/IDAT 连续、APNG 序号、WebP ANMF、GIF disposal、JPEG 段序、跨格式帧时长 | 每类 2 例；100 ms 三格式归一化相等；错写报 `unit_mismatch`；CRC 已知向量单测 | ✅ |
-| M6 | `consumers` 矩阵 + 发布（题目 M5）：9×6 消费者矩阵 + 13 条风险 + 6 条加工 diff；发布 GitHub 公开仓库 | 每行 `evidence` 齐（`selftest_evidence_complete` 绿）；≥4 条加工命令 diff —— **本地已达成**；tag + Release + 发布留档三件套 = **未执行**（待授权，见 `plan/RELEASE-M6.md`） | ⬜ |
+| M6 | `consumers` 矩阵 + 发布（题目 M5）：9×6 消费者矩阵 + 13 条风险 + 6 条加工 diff；发布 GitHub 公开仓库 | 每行 `evidence` 齐（`selftest_evidence_complete` 绿）；≥4 条加工命令 diff；tag + Release（v0.5.0 首发 / v0.5.1 CI 修复）+ 发布留档三件套 | ✅ |
 
 > M1 排在实现之前是刻意的：样本先于判定器，才能避免"探测器按样本实现"的循环论证。每个模块实现前先跑 M1 样本确认基线。
 
