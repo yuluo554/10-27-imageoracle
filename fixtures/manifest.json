@@ -1,0 +1,315 @@
+{
+  "deterministic": true,
+  "fixtures": {
+    "m2_absent.jpg": {
+      "bytes": 144,
+      "sha256": "ca93908b43f7a4e199cfe2fcccdd0ce4067d25a5686c1bf45b7220265577550e",
+      "triggers": [
+        {
+          "code": "orientation_absent",
+          "expected": {
+            "distinct_from_value_1": true,
+            "state": "absent"
+          },
+          "module": "M2"
+        }
+      ]
+    },
+    "m2_orient0_oor.jpg": {
+      "bytes": 204,
+      "sha256": "8b2c99ca6acbee259f167168c499e05cd5489f2260601fb2783a9c17e61ce187",
+      "triggers": [
+        {
+          "code": "orientation_out_of_range",
+          "expected": {
+            "value": 0
+          },
+          "module": "M2"
+        }
+      ]
+    },
+    "m2_orient1_portrait.jpg": {
+      "bytes": 204,
+      "sha256": "ce81beb11f6f7aa6ba7b59acba703721abc005b36c8fae31e6c35f4cdad41081",
+      "triggers": [
+        {
+          "code": "orientation",
+          "expected": {
+            "exif.ifd0.orientation": 1
+          },
+          "module": "M2"
+        }
+      ]
+    },
+    "m2_orient2_mirror.jpg": {
+      "bytes": 204,
+      "sha256": "17e25b9821f2b91e439329677c34bb799befaf6eed87634fa8c7c02f5243c3d3",
+      "triggers": [
+        {
+          "code": "orientation",
+          "expected": {
+            "exif.ifd0.orientation": 2,
+            "mirror_family": true
+          },
+          "module": "M2"
+        }
+      ]
+    },
+    "m2_orient2_portrait.jpg": {
+      "bytes": 204,
+      "sha256": "17e25b9821f2b91e439329677c34bb799befaf6eed87634fa8c7c02f5243c3d3",
+      "triggers": [
+        {
+          "code": "orientation",
+          "expected": {
+            "exif.ifd0.orientation": 2
+          },
+          "module": "M2"
+        }
+      ]
+    },
+    "m2_orient3_portrait.jpg": {
+      "bytes": 204,
+      "sha256": "df86b9c4a4ce500ca23b143cf12723d9a6096d33dd158ac698c11b495ad6d57c",
+      "triggers": [
+        {
+          "code": "orientation",
+          "expected": {
+            "exif.ifd0.orientation": 3
+          },
+          "module": "M2"
+        }
+      ]
+    },
+    "m2_orient4_mirror.jpg": {
+      "bytes": 204,
+      "sha256": "4687f913b599652ed34062bf0af2a0ddf13882328bbbefd6752422e6eeb12f6f",
+      "triggers": [
+        {
+          "code": "orientation",
+          "expected": {
+            "exif.ifd0.orientation": 4,
+            "mirror_family": true
+          },
+          "module": "M2"
+        }
+      ]
+    },
+    "m2_orient4_portrait.jpg": {
+      "bytes": 204,
+      "sha256": "4687f913b599652ed34062bf0af2a0ddf13882328bbbefd6752422e6eeb12f6f",
+      "triggers": [
+        {
+          "code": "orientation",
+          "expected": {
+            "exif.ifd0.orientation": 4
+          },
+          "module": "M2"
+        }
+      ]
+    },
+    "m2_orient5_mirror.jpg": {
+      "bytes": 204,
+      "sha256": "f51c334cee363a12db0f3036551997c085a0115b83726499274a8fe2c72ff737",
+      "triggers": [
+        {
+          "code": "orientation",
+          "expected": {
+            "exif.ifd0.orientation": 5,
+            "mirror_family": true
+          },
+          "module": "M2"
+        }
+      ]
+    },
+    "m2_orient5_portrait.jpg": {
+      "bytes": 204,
+      "sha256": "f51c334cee363a12db0f3036551997c085a0115b83726499274a8fe2c72ff737",
+      "triggers": [
+        {
+          "code": "orientation",
+          "expected": {
+            "exif.ifd0.orientation": 5
+          },
+          "module": "M2"
+        }
+      ]
+    },
+    "m2_orient6_be.tif": {
+      "bytes": 50,
+      "sha256": "6a0179613d662f57b687979c737ab6e6285d86c976c9c8a1c2372b0687776828",
+      "triggers": [
+        {
+          "code": "orientation",
+          "expected": {
+            "exif.ifd0.orientation": 6
+          },
+          "module": "M2"
+        }
+      ]
+    },
+    "m2_orient6_exif.png": {
+      "bytes": 151,
+      "sha256": "f56097db2550ffa8e7ae0fe5a64d58ffe1eab0da3e402f345bbd654b46a50503",
+      "triggers": [
+        {
+          "code": "orientation",
+          "expected": {
+            "exif.ifd0.orientation": 6
+          },
+          "module": "M2"
+        },
+        {
+          "code": "orientation_missing_prefix_ok",
+          "expected": {},
+          "module": "M2"
+        }
+      ]
+    },
+    "m2_orient6_exif_prefixed.png": {
+      "bytes": 157,
+      "sha256": "2e5d5bf7e189d5a5d9ba5ff87fdd6dc8921cea30c34d3e4e3aacbd1737775d48",
+      "triggers": [
+        {
+          "code": "orientation",
+          "expected": {
+            "exif.ifd0.orientation": 6
+          },
+          "module": "M2"
+        },
+        {
+          "code": "note_exif_prefix",
+          "expected": {},
+          "module": "M2"
+        }
+      ]
+    },
+    "m2_orient6_noprefix.webp": {
+      "bytes": 88,
+      "sha256": "3b5584860806aa6aa8b365df4f16aa596cb3063ce951b9a2daf4f2742c711d1b",
+      "triggers": [
+        {
+          "code": "orientation",
+          "expected": {
+            "exif.ifd0.orientation": 6
+          },
+          "module": "M2"
+        }
+      ]
+    },
+    "m2_orient6_portrait.jpg": {
+      "bytes": 204,
+      "sha256": "8ac5496c5100832bcb2900eb9fd82afdff5f16276406f5286811854e2ca45e7a",
+      "triggers": [
+        {
+          "code": "orientation",
+          "expected": {
+            "exif.ifd0.orientation": 6
+          },
+          "module": "M2"
+        }
+      ]
+    },
+    "m2_orient6_prefix.webp": {
+      "bytes": 94,
+      "sha256": "aae4666246f9f7685ceffa48978346c97214cac3c34b186365b6488338905ae1",
+      "triggers": [
+        {
+          "code": "orientation",
+          "expected": {
+            "exif.ifd0.orientation": 6
+          },
+          "module": "M2"
+        }
+      ]
+    },
+    "m2_orient6_wrongtype.jpg": {
+      "bytes": 204,
+      "sha256": "6e88277889f93f84a3c22f6929f80e13d9f7d13fb5cb1b6a79d6fc50ddf21be9",
+      "triggers": [
+        {
+          "code": "orientation_not_int16u",
+          "expected": {
+            "tiff_type": 4
+          },
+          "module": "M2"
+        }
+      ]
+    },
+    "m2_orient7_mirror.jpg": {
+      "bytes": 204,
+      "sha256": "c351ddbdd534f40d1123a2709123d75f1c546ff1ac2365351143ed7305263d32",
+      "triggers": [
+        {
+          "code": "orientation",
+          "expected": {
+            "exif.ifd0.orientation": 7,
+            "mirror_family": true
+          },
+          "module": "M2"
+        }
+      ]
+    },
+    "m2_orient7_portrait.jpg": {
+      "bytes": 204,
+      "sha256": "c351ddbdd534f40d1123a2709123d75f1c546ff1ac2365351143ed7305263d32",
+      "triggers": [
+        {
+          "code": "orientation",
+          "expected": {
+            "exif.ifd0.orientation": 7
+          },
+          "module": "M2"
+        }
+      ]
+    },
+    "m2_orient8_be.tif": {
+      "bytes": 50,
+      "sha256": "09cc8e050434670f0fc7593f90668fef7371aeb0f8f68a1d1bfc84605ad2facf",
+      "triggers": [
+        {
+          "code": "orientation",
+          "expected": {
+            "exif.ifd0.orientation": 8
+          },
+          "module": "M2"
+        }
+      ]
+    },
+    "m2_orient8_portrait.jpg": {
+      "bytes": 204,
+      "sha256": "99f37a0d2d425aa60bf01f21bfa5893404cb8311b548e6a9c10dfdac9fbb810e",
+      "triggers": [
+        {
+          "code": "orientation",
+          "expected": {
+            "exif.ifd0.orientation": 8
+          },
+          "module": "M2"
+        }
+      ]
+    },
+    "m2_orient9_oor.jpg": {
+      "bytes": 204,
+      "sha256": "4c8a692dc6ed4fd99f603ffb190d06c3ad53d5e8541d702d4c3c9e3145cc3c47",
+      "triggers": [
+        {
+          "code": "orientation_out_of_range",
+          "expected": {
+            "value": 9
+          },
+          "module": "M2"
+        }
+      ]
+    }
+  },
+  "generators": [
+    "fixtures/gen_orientation.py"
+  ],
+  "notes": [
+    "structural fixture: pixel data is not decodable (the tool never decodes pixels); all fields the tool reads (tags, offsets, lengths, CRCs, frame timings) are exact",
+    "manifest sha256 是 Python 3.12 的冻结值；zlib 输出跨解释器版本可能不同，CI 跨版本只断言解析结果一致，不断言字节哈希一致（plan/05 §四 #4）",
+    "eXIf：PNG 按规范不带 Exif\\0\\0 前缀；另造一份带前缀的样本记录事实（D10）"
+  ],
+  "schema": 1
+}

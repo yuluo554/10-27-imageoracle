@@ -1,0 +1,93 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gates-and-tests:
+    name: gates + tests (py${{ matrix.python }} / ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.10", "3.12"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Sprint layout gate (methodology binding)
+        run: python tools/check_sprint_layout.py
+
+      - name: Desensitization gate (no host paths / usernames / local proxy)
+        run: python tools/check_desensitized.py
+
+      - name: Gate self-verification (mutation testing)
+        run: python tools/verify_gates.py
+
+      - name: Unit tests (stdlib unittest, zero third-party)
+        run: python -m unittest discover -s tests -t .
+
+      - name: CLI smoke
+        run: |
+          python -m imageoracle --version
+          python -m imageoracle --help
+          python -m imageoracle orientation --help
+
+  zero-dependency-check:
+    name: zero third-party imports (py${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.12"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Assert the CLI runs with site-packages disabled
+        run: python -S -m imageoracle --version
+        env:
+          PYTHONPATH: src
+
+      - name: Assert no third-party import shows up at runtime
+        run: |
+          python -c "import sys; sys.path.insert(0, 'src'); import imageoracle.cli; mods = {m.split('.')[0] for m in sys.modules}; extra = sorted(m for m in mods if m and m not in sys.stdlib_module_names and m != 'imageoracle'); print('non-stdlib imports:', extra); assert extra == [], extra"
+        env:
+          PYTHONPATH: src
+
+  offline:
+    name: offline (no network, nested docker)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build offline image (network allowed at build time only)
+        run: docker build -f .github/offline.Dockerfile -t imageoracle-offline .
+
+      - name: Run gates with no network
+        run: docker run --rm --network none imageoracle-offline python tools/check_sprint_layout.py
+
+      - name: Run unit tests with no network
+        run: docker run --rm --network none imageoracle-offline python -m unittest discover -s tests -t .
+
+      - name: Assert the tool still works with no network (smoke)
+        run: docker run --rm --network none imageoracle-offline python -m imageoracle --version

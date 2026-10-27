@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "imageoracle"
+version = "0.1.0"                     # 唯一定义处之二；与 src/imageoracle/__init__.py 必须一致（测试断言）
+description = "ImageOracle：图像呈现预言机（只读字节，预言各软件会显示成什么样）"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "yuluo554", email = "282769740+yuluo554@users.noreply.github.com" }]
+keywords = ["exif", "orientation", "icc", "png", "apng", "webp", "gif", "metadata", "cli"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Graphics",
+    "Typing :: Typed",
+]
+dependencies = []                     # 零第三方依赖：这是可断言的红线，不是偏好
+
+[project.scripts]
+imageoracle = "imageoracle.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/yuluo554/10-27-imageoracle"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]

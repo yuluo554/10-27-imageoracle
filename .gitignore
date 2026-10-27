@@ -78,6 +78,9 @@ desktop.ini
 *.swp
 *~
 
+# ---- 本机 agent 运行时状态（工具产物，不入仓）----
+.mimosa/
+
 # ---- 本项目：真实照片与生成产物不入仓 ----
 # 隐私红线：真实照片绝不入仓；样本全部程序化合成。
 *.jpg
@@ -108,3 +111,13 @@ build/out/
 
 # 例外：文档中的示意图（如需入仓，用 .gitignore 例外逐条放开）
 # !data/diagrams/*.png
+
+# ---- 例外：生成器的库代码必须入仓 ----
+# 上面 Python 模板里的 `lib/` 会匹配**任意层级**的 lib 目录，
+# 于是 fixtures/lib/ 被静默忽略 → 干净 clone 里生成器直接缺件（实测：git status 看不到它们）。
+# 这类"夹在通用模板里的本地目录"要用显式例外放开，别靠"我本地有"。
+# 注意例外要写成 `*.py` 而不是 `**`：`**` 会把 `fixtures/lib/__pycache__/` 一起放开
+# （后面的否定规则会覆盖前面的 `__pycache__/`），把 .pyc 带进仓。
+!fixtures/lib/
+!fixtures/lib/*.py
+fixtures/lib/__pycache__/
