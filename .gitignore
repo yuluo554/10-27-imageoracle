@@ -1,0 +1,110 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# pyright
+.pyright/
+
+# Jupyter
+.ipynb_checkpoints
+
+# ---- Node (fixtures 生成脚本可能用 sharp) ----
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp
+*~
+
+# ---- 本项目：真实照片与生成产物不入仓 ----
+# 隐私红线：真实照片绝不入仓；样本全部程序化合成。
+*.jpg
+*.jpeg
+*.jpe
+*.jfif
+*.tif
+*.tiff
+*.png
+*.apng
+*.webp
+*.gif
+*.avif
+*.heic
+*.heif
+*.bmp
+*.psd
+*.cr2
+*.nef
+*.arw
+*.dng
+
+# 派生/生成目录
+out/
+fixtures/out/
+build/out/
+*.report.json
+
+# 例外：文档中的示意图（如需入仓，用 .gitignore 例外逐条放开）
+# !data/diagrams/*.png
