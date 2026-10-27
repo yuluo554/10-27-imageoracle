@@ -15,5 +15,11 @@ FROM python:3.12-slim
 WORKDIR /work
 COPY . /work
 
-# 不 pip install：本项目运行时零依赖
+# 不 pip install：本项目运行时零依赖。
+# **但必须把 src/ 放进 PYTHONPATH**——首推实测：不加这一行，`python -m imageoracle`
+# 报 `No module named imageoracle`（镜像里没装包，本仓是 src 布局）。
+ENV PYTHONPATH=/work/src \
+    PYTHONUTF8=1 \
+    PYTHONIOENCODING=utf-8
+
 CMD ["python", "-m", "imageoracle", "--help"]

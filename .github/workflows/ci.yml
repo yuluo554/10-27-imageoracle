@@ -14,6 +14,13 @@ jobs:
   gates-and-tests:
     name: gates + tests (py${{ matrix.python }} / ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    # 首推实测（v0.5.0）：本仓是 src 布局、不装包，所有步骤都要 PYTHONPATH=src
+    # （此前 CLI smoke 报 `No module named imageoracle`）；Windows 控制台默认代码页
+    # 编不了门的四字节中文输出（`UnicodeEncodeError: 'charmap'`），必须强制 UTF-8。
+    env:
+      PYTHONPATH: src
+      PYTHONUTF8: "1"
+      PYTHONIOENCODING: utf-8
     strategy:
       fail-fast: false
       matrix:
@@ -68,8 +75,11 @@ jobs:
           PYTHONPATH: src
 
       - name: Assert no third-party import shows up at runtime
+        # 首推实测（v0.5.0）：不用 `-S` 时 `_distutils_hack`（setuptools 的 site hook）
+        # 会出现在 sys.modules 里；`python -c` 自身还会带上 `__main__`。
+        # 两者都不是本包的依赖 → 用 `-S` 关掉 site，并把 `__main__` 作为解释器自身排除。
         run: |
-          python -c "import sys; sys.path.insert(0, 'src'); import imageoracle.cli; mods = {m.split('.')[0] for m in sys.modules}; extra = sorted(m for m in mods if m and m not in sys.stdlib_module_names and m != 'imageoracle'); print('non-stdlib imports:', extra); assert extra == [], extra"
+          python -S -c "import sys; sys.path.insert(0, 'src'); import imageoracle.cli; mods = {m.split('.')[0] for m in sys.modules}; allowed = {'imageoracle', '__main__'}; extra = sorted(m for m in mods if m and m not in sys.stdlib_module_names and m not in allowed); print('non-stdlib imports:', extra); assert extra == [], extra"
         env:
           PYTHONPATH: src
 
