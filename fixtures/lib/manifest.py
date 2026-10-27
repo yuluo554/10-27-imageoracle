@@ -55,8 +55,20 @@ def read_manifest(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def compare(manifest_path: Path, items: dict[str, tuple[bytes, list[dict]]], out_dir: Path) -> list[str]:
-    """两层断言。返回问题列表（空 = 一致）。**不抛异常**，缺件走显式 SKIP 由调用方打印。"""
+def compare(
+    manifest_path: Path,
+    items: dict[str, tuple[bytes, list[dict]]],
+    out_dir: Path,
+    *,
+    strict: bool = True,
+) -> list[str]:
+    """两层断言。返回问题列表（空 = 一致）。**不抛异常**，缺件走显式 SKIP 由调用方打印。
+
+    `strict=True`（聚合器 `gen_all.py --check`）：manifest 的 fixture 集合必须与
+    `items` **恰好相等**——多一条少一条都算漂移。
+    `strict=False`（单族生成器独立 `--check`）：只核对本族产出的名字，
+    忽略 manifest 里属于其他族的条目（各族独立可跑，但谁都不许漏报自己的哈希）。
+    """
     if not manifest_path.is_file():
         return [f"{manifest_path.name} 不存在（先跑一次不带 --check）"]
 
@@ -64,8 +76,9 @@ def compare(manifest_path: Path, items: dict[str, tuple[bytes, list[dict]]], out
     problems: list[str] = []
 
     now_names, frozen_names = set(items), set(frozen)
-    for name in sorted(frozen_names - now_names):
-        problems.append(f"manifest 有条目但生成器不再产出: {name}")
+    if strict:
+        for name in sorted(frozen_names - now_names):
+            problems.append(f"manifest 有条目但生成器不再产出: {name}")
     for name in sorted(now_names - frozen_names):
         problems.append(f"生成器产出但 manifest 无条目: {name}")
     for name in sorted(now_names & frozen_names):

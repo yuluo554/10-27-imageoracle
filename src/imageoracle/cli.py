@@ -89,6 +89,10 @@ def build_parser() -> argparse.ArgumentParser:
 def _help_for(name: str) -> str:
     return {
         "orientation": "读取 EXIF/XMP 方向并给出 8 元变换矩阵与有效宽高",
+        "double-rotate": "预言会被转两次的组合（IFD1 不同步 / XMP 残留 / 大边启发式）",
+        "color": "ICC 体检 + 色彩标记 + 位深 + CMYK，并列出无 profile 时的默认假设表",
+        "container": "校验 PNG/APNG/WebP/GIF/JPEG 的容器结构，并把帧时长归一化到整数 ms",
+        "consumers": "给出 9 个消费者的方向/ICC/丢 chunk/双重旋转/帧时长矩阵 + 加工命令 diff",
     }.get(name, name)
 
 
@@ -172,6 +176,30 @@ def _run_one(module, command: str, raw_path: str, generated_at: str, args) -> tu
         payload["sources"] = result.get("sources", [])
         payload["primary"] = result.get("primary")
         payload["effective_size"] = result.get("effective_size")
+
+    if command == "double-rotate":
+        payload["condition_hits"] = result.get("condition_hits", [])
+        payload["certain"] = result.get("certain", [])
+        payload["heuristic"] = result.get("heuristic", [])
+        payload["verdicts"] = result.get("verdicts", [])
+        payload["sources"] = result.get("sources", [])
+        payload["primary"] = result.get("primary")
+        payload["effective_size"] = result.get("effective_size")
+
+    if command == "color":
+        payload["icc"] = result.get("icc")
+        payload["color_markers"] = result.get("color_markers")
+        payload["default_assumptions"] = result.get("default_assumptions", [])
+
+    if command == "container":
+        payload["frames"] = result.get("frames", [])
+        payload["container_facts"] = result.get("container_facts")
+
+    if command == "consumers":
+        payload["matrix"] = result.get("matrix")
+        payload["consumers"] = result.get("consumers", [])
+        payload["risks"] = result.get("risks", [])
+        payload["process_diffs"] = result.get("process_diffs", [])
 
     if args.selftest_evidence:
         problems = selftest_evidence_complete(payload)

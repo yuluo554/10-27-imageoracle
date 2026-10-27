@@ -9,8 +9,8 @@
     L1  删 AGENTS.md                        → LAYOUT.FILES 红
     L2  删一份 plan/04                      → LAYOUT.FILES 红（计划套件不齐）
     L3  删 plan/00 顶部装订行               → LAYOUT.BINDING_HEAD 红
-    L4  删 HANDOFF-M1                       → LAYOUT.HANDOFFS 红
-    L5  删 HANDOFF 的一节标题               → LAYOUT.HANDOFFS 红
+    L4  删「最新 ✅ 里程碑」的交接单     → LAYOUT.HANDOFFS 红
+    L5  删该交接单的一节标题             → LAYOUT.HANDOFFS 红
     L6  在**一个副本**里把 ✅ 翻成 ⬜        → LAYOUT.STATUS 红（跨副本不一致）
     L8  往缺口格写已 ✅ 的里程碑号          → LAYOUT.GAPS 红
     L9  往台账某条挂 ⬜ 待 M<已✅>           → LAYOUT.LEDGER 红
@@ -133,10 +133,11 @@ class Deletion:
 class CompoundMutation:
     """把多个变异当成一个原子操作（apply 全做、restore 全还原）。
 
-    为什么需要（本项目的真缺陷）：`LAYOUT.HANDOFFS` 只对**已 ✅** 的里程碑查交接单，
-    而 M0 已声明豁免、M1 尚未完成 → 直接删 `HANDOFF-M1.md` **门不会红**（判据根本没读到它）。
-    照原样写变异会得出"门是假门"的错误结论。正解 = 先把 M1 在三处副本里翻成 ✅
-    （让判据激活），再动交接单；**判据面一条不减**，且两条分支都断言字节真的变了。
+    为什么需要（本项目的真缺陷）：某些判据只对**特定状态**生效，单点变异会恒绿。
+    例：`LAYOUT.RELEASE` 只查"发布里程碑 ✅ 且无留档"，而 M6 现在是 ⬜ →
+    直接写一份 `RELEASE-M6.md` 或直接翻一个副本都不够，得先把 M6 在**全部**副本里翻 ✅
+    再动留档；`LAYOUT.STATUS` 会先红，所以必须用 `fail_id` 钉死到底红的是哪一条。
+    **判据面一条不减**，且每条分支都断言字节真的变了。
     """
 
     def __init__(self, *mutations) -> None:
@@ -221,6 +222,27 @@ def _first_done_status_line(rel: str) -> str | None:
     return None
 
 
+def _latest_done_milestone(copies: tuple[str, ...], *, floor: int = 1) -> int | None:
+    """从**全部**状态副本里找最大的已 ✅ 里程碑号（≥ floor）。
+
+    两态探测、不依赖项目进度：HANDOFF 判据只对已 ✅ 的里程碑生效，
+    靶子因此必须取自"当前已 ✅ 的集合"，而不是硬编码某一个里程碑号
+    （硬编码会在该里程碑翻 ✅ 后让 `activate_milestone` 的"断言当前是 ⬜"先崩——本棒实测）。
+    """
+    best: int | None = None
+    for rel in copies:
+        path = ROOT / rel
+        if not path.is_file():
+            continue
+        for line in path.read_text(encoding="utf-8").splitlines():
+            match = re.match(r"^\|\s*\*{0,2}M(\d+)\b", line)
+            if match and "✅" in line:
+                number = int(match.group(1))
+                if number >= floor and (best is None or number > best):
+                    best = number
+    return best
+
+
 def layout_cases(results: list[tuple[bool, str]]) -> None:
     gate = "check_sprint_layout"
 
@@ -247,41 +269,44 @@ def layout_cases(results: list[tuple[bool, str]]) -> None:
         )
     )
 
-    # L4 / L5：靶子是"仓库里有这么一件东西"（HANDOFF 已落盘），不依赖项目进度。
-    # **关键**：HANDOFF 判据只对已 ✅ 的里程碑生效，而 M1 尚未完成 → 必须先把 M1
-    # 在三处副本里翻成 ✅ 让判据激活，再动交接单（否则变异恒绿 = 假门结论）。
+    # L4 / L5：靶子 = **最新 ✅ 里程碑**的交接单（HANDOFF 判据只对已 ✅ 的里程碑生效）。
+    # 靶子从"当前已 ✅ 的集合"里取，而不是硬编码某个里程碑号——硬编码会在该里程碑翻 ✅
+    # 之后让 `activate_milestone` 的"断言当前是 ⬜"先崩（本棒实测：M1 翻 ✅ 后 L4/L5 自崩）。
     STATUS_COPY_FILES = (
         "plan/00-README总览.md",
         "plan/05-里程碑与发布.md",
         "README.md",
     )
-    handoff_rel = "plan/HANDOFF-M1.md"
-    handoff = ROOT / handoff_rel
-    if handoff.is_file():
-        text = handoff.read_text(encoding="utf-8")
-        section = next((s for s in ("## 三、下一棒待办", "## 三、待办") if s in text), None)
-        if section:
+    active = _latest_done_milestone(STATUS_COPY_FILES)
+    if active is None:
+        results.append((False, "SKIP-L4/L5  没有 ≥M1 的 ✅ 里程碑（交接单判据未激活）"))
+    else:
+        handoff_rel = f"plan/HANDOFF-M{active}.md"
+        handoff = ROOT / handoff_rel
+        if handoff.is_file():
+            text = handoff.read_text(encoding="utf-8")
+            section = next((s for s in ("## 三、下一棒待办", "## 三、待办") if s in text), None)
+            if section:
+                results.append(
+                    expect(
+                        gate,
+                        Mutation(handoff_rel, section, "## 三、后续"),
+                        note=f"L5 删 HANDOFF 必需节关键词（M{active} 已激活）→ HANDOFFS 红",
+                        fail_id="LAYOUT.HANDOFFS",
+                    )
+                )
+            else:
+                results.append((False, f"SKIP-L5  {handoff_rel} 里找不到可用的节标题"))
             results.append(
                 expect(
                     gate,
-                    CompoundMutation(
-                        activate_milestone(1, STATUS_COPY_FILES),
-                        Mutation(handoff_rel, section, "## 三、后续"),
-                    ),
-                    note="L5 删 HANDOFF 必需节关键词（M1 已激活）→ HANDOFFS 红", fail_id="LAYOUT.HANDOFFS",
+                    Deletion(handoff_rel),
+                    note=f"L4 删 HANDOFF-M{active}（已激活）→ HANDOFFS 红",
+                    fail_id="LAYOUT.HANDOFFS",
                 )
             )
         else:
-            results.append((False, "SKIP-L5  HANDOFF-M1 里找不到可用的节标题"))
-        results.append(
-            expect(
-                gate,
-                CompoundMutation(activate_milestone(1, STATUS_COPY_FILES), Deletion(handoff_rel)),
-                note="L4 删 HANDOFF-M1（M1 已激活）→ HANDOFFS 红", fail_id="LAYOUT.HANDOFFS",
-            )
-        )
-    else:
-        results.append((False, "SKIP-L4/L5  HANDOFF-M1.md 尚不存在"))
+            results.append((False, f"SKIP-L4/L5  {handoff_rel} 尚不存在（已 ✅ 的里程碑缺交接单）"))
 
     # L6：两态探测——找 ✅ 行翻成 ⬜（不依赖"还有待办里程碑"，永不过期）
     status_line = _first_done_status_line("README.md")

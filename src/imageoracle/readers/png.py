@@ -2,6 +2,8 @@
 """容器层：PNG / APNG。只切 chunk，不解压 IDAT，不做 CRC 校验（那属于 M5 判决层）。
 
 CRC 计算放在这里是因为它是**结构解析**的一部分，但**判定**（报不报错）在 modules/container。
+APNG 的帧时长（`fcTL` 的 `delay_num`/`delay_den`）也在这里切成 `Frame`——判决层只读归一化结果，
+不重解析 chunk 字节（`data/README` §8.3 的整数口径只实现一次）。
 """
 
 from __future__ import annotations
@@ -9,7 +11,7 @@ from __future__ import annotations
 import struct
 import zlib
 
-from ..model import Chunk, ImageInfo
+from ..model import Chunk, Frame, ImageInfo
 
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 
@@ -21,11 +23,12 @@ class PngError(ValueError):
     """不是可解析的 PNG（→ exit 3）。"""
 
 
-def parse(data: bytes) -> tuple[list[Chunk], ImageInfo | None]:
+def parse(data: bytes) -> tuple[list[Chunk], ImageInfo | None, list[Frame]]:
     if not data.startswith(PNG_SIGNATURE):
         raise PngError("missing PNG signature")
 
     chunks: list[Chunk] = []
+    frames: list[Frame] = []
     info: ImageInfo | None = None
     pos = len(PNG_SIGNATURE)
 
@@ -56,11 +59,34 @@ def parse(data: bytes) -> tuple[list[Chunk], ImageInfo | None]:
             color_type = raw[9]
             info = ImageInfo(width=width, height=height, bit_depth=bit_depth, color_type=color_type)
 
+        if ctype == "fcTL" and len(raw) >= 26:
+            frame = _fctl_frame(len(frames) + 1, raw)
+            if frame is not None:
+                frames.append(frame)
+
         pos = data_end + 4
         if ctype == "IEND":
             break
 
-    return chunks, info
+    return chunks, info, frames
+
+
+def _fctl_frame(index: int, raw: bytes) -> Frame | None:
+    """`fcTL` 载荷 → `Frame`。`delay_den == 0` 按 100 处理（`data/README` §1.6 / §8.3）。"""
+    try:
+        (_seq, _w, _h, _x, _y, delay_num, delay_den,
+         dispose_op, _blend_op) = struct.unpack(">IIIIIHHBB", raw[:26])
+    except struct.error:        # pragma: no cover - 上面已判 len(raw) >= 26
+        return None
+    den = delay_den or 100
+    return Frame(
+        index=index,
+        duration_ms=delay_num * 1000 // den,   # 整数运算，不出浮点（§8.3）
+        raw_duration=delay_num,
+        raw_unit="num/den",
+        dispose=dispose_op,
+        raw_den=delay_den,
+    )
 
 
 def chunk_bytes(chunk: Chunk) -> bytes:

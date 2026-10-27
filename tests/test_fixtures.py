@@ -24,6 +24,7 @@ sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "fixtures"))
 sys.path.insert(0, str(ROOT / "fixtures" / "lib"))
 
+import gen_all  # noqa: E402
 import gen_orientation  # noqa: E402
 from tests._helpers import run_script  # noqa: E402
 
@@ -92,10 +93,11 @@ class TestManifest(unittest.TestCase):
         manifest_path = ROOT / "fixtures" / "manifest.json"
         self.assertTrue(
             manifest_path.is_file(),
-            "fixtures/manifest.json 缺失：先跑 py -3.12 fixtures/gen_orientation.py",
+            "fixtures/manifest.json 缺失：先跑 py -3.12 fixtures/gen_all.py",
         )
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-        items = gen_orientation.build_all()
+        # manifest 由聚合器汇写四族全集；这里与**聚合产出**比集合
+        items = gen_all.build_all()
         self.assertEqual(set(manifest["fixtures"]), set(items), "manifest 与生成器产出集合不等")
 
     def test_manifest_notes_state_structural_limit(self) -> None:

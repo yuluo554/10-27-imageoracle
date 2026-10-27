@@ -89,6 +89,28 @@ def render_text(document: dict[str, Any]) -> str:
         if ev.get("spec"):
             lines.append(f"            evidence: {ev['spec']} — {ev.get('quote', '')[:90]}")
 
+    consumers = document.get("consumers") or []
+    if consumers:
+        matrix = document.get("matrix") or {}
+        columns = matrix.get("columns") or []
+        lines.append("-" * 64)
+        lines.append(
+            f"consumers matrix: {matrix.get('rows', len(consumers))} rows × {len(columns) or 6} columns"
+            f" · snapshot {matrix.get('snapshot_date', '?')}"
+        )
+        lines.append(
+            f"{'consumer':16} {'orient':9} {'icc':8} {'dbl':8} {'frame':20} {'conf':13} drops"
+        )
+        for row in consumers:
+            drops = ",".join(row.get("dropped_chunks") or []) or "-"
+            lines.append(
+                f"{row.get('consumer', '?'):16} {row.get('applies_orientation', '?'):9} "
+                f"{row.get('applies_icc', '?'):8} {row.get('double_rotate_risk', '?'):8} "
+                f"{row.get('frame_duration', '?'):20} {row.get('confidence', '?'):13} {drops}"
+            )
+        active = matrix.get("active_risks") or []
+        lines.append(f"risks applying to this file: {', '.join(active) if active else '(none)'}")
+
     summary = document.get("summary", {})
     lines.append("-" * 64)
     lines.append(" ".join(f"{k}={v}" for k, v in summary.items()))
@@ -96,7 +118,14 @@ def render_text(document: dict[str, Any]) -> str:
 
 
 def selftest_evidence_complete(document: dict[str, Any]) -> list[str]:
-    """M6 硬验收：任何没有 `evidence` 的 finding 即判失败。
+    """M6 硬验收：任何没有 `evidence` 的行即判失败。
+
+    覆盖两个面：
+
+    1. `findings` —— 每条都要 `evidence.spec` + `evidence.quote`（M2–M6 一律适用）；
+    2. `consumers` / `risks` / `process_diffs` —— **每行**要有 `evidence`，且
+       `kind ∈ {spec, tool-doc, hn-quote}`；`tool-doc` / `hn-quote` 必须带 URL（`plan/03` §五）；
+       `consumers` / `risks` 还要 `confidence ∈ {certain, single-source, gray}`。
 
     返回问题列表（空 = 通过）。**不抛异常**：调用方决定是报错还是打印。
     """
@@ -108,4 +137,44 @@ def selftest_evidence_complete(document: dict[str, Any]) -> list[str]:
             continue
         if not ev.get("quote"):
             problems.append(f"findings[{i}] code={f.get('code')!r} 缺 evidence.quote")
+
+    problems.extend(_rows_evidence_problems(document.get("consumers") or [], "consumers", require_confidence=True))
+    problems.extend(_rows_evidence_problems(document.get("risks") or [], "risks", require_confidence=True))
+    problems.extend(
+        _rows_evidence_problems(document.get("process_diffs") or [], "process_diffs", require_confidence=False)
+    )
+    return problems
+
+
+#: 证据形态 / 置信度词表（唯一定义处 `data/README.md` §8.9；呈现层只做形态校验，不查语义）
+ROW_EVIDENCE_KINDS = frozenset({"spec", "tool-doc", "hn-quote"})
+ROW_CONFIDENCES = frozenset({"certain", "single-source", "gray"})
+_URL_EVIDENCE_KINDS = frozenset({"tool-doc", "hn-quote"})
+
+
+def _rows_evidence_problems(
+    rows: list[dict[str, Any]],
+    label: str,
+    *,
+    require_confidence: bool,
+) -> list[str]:
+    problems: list[str] = []
+    for index, row in enumerate(rows):
+        marker = row.get("consumer") or row.get("command") or row.get("id") or "?"
+        where = f"{label}[{index}] ({marker})"
+        evidence = row.get("evidence")
+        if not isinstance(evidence, dict) or not evidence:
+            problems.append(f"{where} 缺 evidence")
+            continue
+        kind = evidence.get("kind")
+        if kind not in ROW_EVIDENCE_KINDS:
+            problems.append(f"{where} evidence.kind={kind!r} 不在 {sorted(ROW_EVIDENCE_KINDS)}")
+        if not evidence.get("quote"):
+            problems.append(f"{where} 缺 evidence.quote")
+        if kind in _URL_EVIDENCE_KINDS and not evidence.get("url"):
+            problems.append(f"{where} evidence.kind={kind} 必须带 URL")
+        if kind == "spec" and not evidence.get("spec"):
+            problems.append(f"{where} evidence.kind=spec 必须带条款 ID")
+        if require_confidence and row.get("confidence") not in ROW_CONFIDENCES:
+            problems.append(f"{where} confidence={row.get('confidence')!r} 不在 {sorted(ROW_CONFIDENCES)}")
     return problems

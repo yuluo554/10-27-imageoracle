@@ -22,12 +22,14 @@ sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "fixtures" / "lib"))
 
 from imageoracle.cli import (  # noqa: E402
+    COMMANDS,
     EXIT_CLEAN,
     EXIT_ERROR,
     EXIT_UNPARSABLE,
     EXIT_WARNING,
     exit_code_for,
 )
+from imageoracle import modules  # noqa: E402
 from imageoracle.report import render_json, selftest_evidence_complete  # noqa: E402
 
 from build import build_jpeg, png_chunk, build_png, tiff_with_orientation  # noqa: E402
@@ -85,6 +87,74 @@ class TestExitCodeSingleSource(unittest.TestCase):
                 if isinstance(node, ast.FunctionDef) and node.name == "exit_code_for":
                     definitions.append(str(path.relative_to(ROOT)))
         self.assertEqual(definitions, ["src\\imageoracle\\cli.py"] if sys.platform == "win32" else ["src/imageoracle/cli.py"])
+
+
+class TestModuleRegistration(unittest.TestCase):
+    """K15：`IMPLEMENTED` / `PLANNED` 必须与 CLI **实际暴露面**一致。
+
+    这条判据是本棒补的实物——`plan/HANDOFF-M3.md` §三.6 点名"登记一致性绿"，
+    在该判据存在之前那句话无实物可依（skill：文档点名的判据必须有落点）。
+    判据面从**真 CLI**（`build_parser()`）采，而不是从两个 dict 互相比：
+    两边同错就恒绿，等于没判据。
+    """
+
+    def test_registry_matches_parser_surface(self) -> None:
+        import argparse
+
+        from imageoracle.cli import build_parser
+
+        parser = build_parser()
+        subparsers = next(
+            action for action in parser._actions if isinstance(action, argparse._SubParsersAction)
+        )
+        exposed = set(subparsers.choices)
+        self.assertEqual(
+            exposed,
+            set(modules.IMPLEMENTED) | set(modules.PLANNED),
+            "CLI 暴露的命令面与 IMPLEMENTED|PLANNED 登记不符",
+        )
+
+    def test_implemented_and_planned_are_disjoint(self) -> None:
+        overlap = set(modules.IMPLEMENTED) & set(modules.PLANNED)
+        self.assertEqual(overlap, set(), f"同一模块同时登记在两表: {overlap}")
+
+    def test_registry_covers_all_commands(self) -> None:
+        self.assertEqual(
+            set(modules.IMPLEMENTED) | set(modules.PLANNED),
+            set(COMMANDS),
+            "`cli.COMMANDS` 与模块登记表不同步",
+        )
+
+    def test_planned_modules_raise_not_implemented(self) -> None:
+        """登记在 `PLANNED` 的模块必须确实抛 `NotImplementedError`（不许'看着像有'）。
+
+        M6 之后 `PLANNED` 为空（五个模块全部落地），本循环退化为空跑——**这不是判据**，
+        而是"占位面"的守门器；末棒状态由下面两条显式断言（`test_no_planned_modules_left`）。
+        """
+        from imageoracle.model import Container
+
+        dummy = Container(kind="jpeg", path="x", size=0)
+        for name, (milestone, doc) in modules.PLANNED.items():
+            with self.subTest(module=name):
+                self.assertRegex(milestone, r"^M\d+$")
+                self.assertTrue(doc.strip(), f"{name} 的契约位置为空")
+                module = __import__(f"imageoracle.modules.{name.replace('-', '_')}", fromlist=["analyze"])
+                with self.assertRaises(NotImplementedError):
+                    module.analyze(dummy)
+
+    def test_double_rotate_is_wired(self) -> None:
+        """M3 出口：`double-rotate` 在 `IMPLEMENTED` 里，且**不在** `PLANNED` 里。"""
+        self.assertIn("double-rotate", modules.IMPLEMENTED)
+        self.assertNotIn("double-rotate", modules.PLANNED)
+
+    def test_consumers_is_wired(self) -> None:
+        """M6 出口：`consumers` 在 `IMPLEMENTED` 里，且**不在** `PLANNED` 里。"""
+        self.assertIn("consumers", modules.IMPLEMENTED)
+        self.assertNotIn("consumers", modules.PLANNED)
+
+    def test_no_planned_modules_left(self) -> None:
+        """末棒：`PLANNED` 必须为空——留着占位就是"文档说没做完"。"""
+        self.assertEqual(modules.PLANNED, {})
 
 
 class TestDeterminism(unittest.TestCase):

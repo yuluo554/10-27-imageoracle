@@ -301,15 +301,528 @@
           "module": "M2"
         }
       ]
+    },
+    "m3_bigedge_mismatch.jpg": {
+      "bytes": 204,
+      "sha256": "c4d30d380b9cab93002729cab8d8a820a8ae46a6dd02d3544c9f33d2cfb70a57",
+      "triggers": [
+        {
+          "code": "double_rotate_bigedge_mismatch",
+          "expected": {
+            "condition": 3,
+            "confidence": "gray-heuristic",
+            "exif.ifd0.orientation": 6,
+            "severity": "suspicion",
+            "stored": [
+              80,
+              40
+            ]
+          },
+          "module": "M3"
+        }
+      ]
+    },
+    "m3_ifd1_unsynced.jpg": {
+      "bytes": 222,
+      "sha256": "31822b2499751b585ae590d0a479c9725a9d517dc63d7a2ce0ef58cb060be123",
+      "triggers": [
+        {
+          "code": "double_rotate_ifd1_unsynced",
+          "expected": {
+            "condition": 1,
+            "confidence": "certain",
+            "exif.ifd0.orientation": 6,
+            "exif.ifd1.orientation": 1
+          },
+          "module": "M3"
+        }
+      ]
+    },
+    "m3_xmp_residual.jpg": {
+      "bytes": 536,
+      "sha256": "946a2f57488524e0c18a5bcbb8da835d900e7c0c420cccfaa6ceacb892528f07",
+      "triggers": [
+        {
+          "code": "double_rotate_xmp_conflict",
+          "expected": {
+            "condition": 2,
+            "confidence": "certain",
+            "exif.ifd0.orientation": 1,
+            "xmp.tiff:Orientation": 6
+          },
+          "module": "M3"
+        }
+      ]
+    },
+    "m4_cmyk_app14.jpg": {
+      "bytes": 165,
+      "sha256": "94fff60d8fb17fda0e69224df89055261efef244cb79fbc4c6db47df01d05181",
+      "triggers": [
+        {
+          "code": "cmyk_jpeg",
+          "expected": {
+            "app14_transform": 0,
+            "components": 4,
+            "severity": "warning"
+          },
+          "module": "M4"
+        }
+      ]
+    },
+    "m4_icc_acsp_bad.jpg": {
+      "bytes": 418,
+      "sha256": "50cd2e862e778661cc3e4e182f88bccc66b71bb38058571ab8bfd88281db63d7",
+      "triggers": [
+        {
+          "code": "icc_bad_signature",
+          "expected": {
+            "severity": "error",
+            "signature": "acsq"
+          },
+          "module": "M4"
+        }
+      ]
+    },
+    "m4_icc_acsp_bad.png": {
+      "bytes": 148,
+      "sha256": "39ca2a48ed943250ecdad6d82579c03848fbf501aac69ce017cad9db6c856a3b",
+      "triggers": [
+        {
+          "code": "compressed_profile_not_inspected",
+          "expected": {
+            "carrier": "iCCP",
+            "severity": "unknown"
+          },
+          "module": "M4"
+        }
+      ]
+    },
+    "m4_icc_multi_segment.jpg": {
+      "bytes": 480,
+      "sha256": "59722fd75e9e232fdb09fa4988ee4b0bc9061a341a8b24b4a78bc59a39ea8053",
+      "triggers": [
+        {
+          "code": "icc_present",
+          "expected": {
+            "carrier": "APP2",
+            "profile_length": 300,
+            "segments": 2
+          },
+          "module": "M4"
+        }
+      ]
+    },
+    "m4_icc_ok.jpg": {
+      "bytes": 418,
+      "sha256": "5f36761a4f5263dc8d1c34f37b9df82911346766a4656d82452c60dfa20582f2",
+      "triggers": [
+        {
+          "code": "icc_present",
+          "expected": {
+            "carrier": "APP2",
+            "severity": "info"
+          },
+          "module": "M4"
+        }
+      ]
+    },
+    "m4_icc_ok.png": {
+      "bytes": 148,
+      "sha256": "d0a6aded66d547bcdba58c42de56a134a35e843e741dc1eb3096d5c371bda344",
+      "triggers": [
+        {
+          "code": "icc_present",
+          "expected": {
+            "carrier": "iCCP",
+            "severity": "info"
+          },
+          "module": "M4"
+        },
+        {
+          "code": "compressed_profile_not_inspected",
+          "expected": {
+            "carrier": "iCCP",
+            "severity": "unknown"
+          },
+          "module": "M4"
+        }
+      ]
+    },
+    "m4_icc_segment_gap.jpg": {
+      "bytes": 480,
+      "sha256": "7cfe10d4e21f5cfdad4f2424e190ce93827f6f776410c015b3bcdd333a34bcb4",
+      "triggers": [
+        {
+          "code": "icc_segment_gap",
+          "expected": {
+            "carrier": "APP2",
+            "severity": "error"
+          },
+          "module": "M4"
+        }
+      ]
+    },
+    "m4_icc_size_bad.jpg": {
+      "bytes": 1662,
+      "sha256": "acae2a60b14170e9b6a8bf6a6b1cccce960325e97eb88742979f12bb49e6340d",
+      "triggers": [
+        {
+          "code": "icc_size_mismatch",
+          "expected": {
+            "actual": 1500,
+            "declared": 2000,
+            "severity": "error"
+          },
+          "module": "M4"
+        }
+      ]
+    },
+    "m4_icc_size_bad.png": {
+      "bytes": 156,
+      "sha256": "19d4d673e271c597dcef25dece88a45acadf7da81af060f9ddb55b19827d138f",
+      "triggers": [
+        {
+          "code": "compressed_profile_not_inspected",
+          "expected": {
+            "carrier": "iCCP",
+            "severity": "unknown"
+          },
+          "module": "M4"
+        }
+      ]
+    },
+    "m4_icc_tiff34675.tif": {
+      "bytes": 306,
+      "sha256": "9648fedba8163340aa6799f2e4ffb06d539885ab12c00031cc482e49c975b453",
+      "triggers": [
+        {
+          "code": "icc_present",
+          "expected": {
+            "carrier": "tag34675",
+            "severity": "info"
+          },
+          "module": "M4"
+        }
+      ]
+    },
+    "m4_icc_truncated.jpg": {
+      "bytes": 262,
+      "sha256": "e0f67c3864489b7dcedeaac6572af380e0259160ebb46ce9c8f919da9cd178e7",
+      "triggers": [
+        {
+          "code": "icc_header_truncated",
+          "expected": {
+            "length": 100,
+            "severity": "error"
+          },
+          "module": "M4"
+        }
+      ]
+    },
+    "m4_icc_truncated.png": {
+      "bytes": 147,
+      "sha256": "e049060c7c1fab774101f5ac4da64e212da036a63046c7913489cd61db8eaa29",
+      "triggers": [
+        {
+          "code": "compressed_profile_not_inspected",
+          "expected": {
+            "carrier": "iCCP",
+            "severity": "unknown"
+          },
+          "module": "M4"
+        }
+      ]
+    },
+    "m4_iccp_srgb_conflict.png": {
+      "bytes": 161,
+      "sha256": "67f20a6689dadcef6dc228325c8c40aad537d5bc9d5fa5958138757139fe8893",
+      "triggers": [
+        {
+          "code": "iccp_srgb_conflict",
+          "expected": {
+            "quote_says": "should not",
+            "severity": "warning"
+          },
+          "module": "M4"
+        }
+      ]
+    },
+    "m4_lr0_form.png": {
+      "bytes": 230,
+      "sha256": "81daefc07ddbd8b48d31b995fa6d714af3bbe77be3cdf705524035e7a7e396a0",
+      "triggers": [
+        {
+          "code": "icc_present",
+          "expected": {
+            "carrier": "iCCP",
+            "severity": "info"
+          },
+          "module": "M4"
+        },
+        {
+          "code": "compressed_profile_not_inspected",
+          "expected": {
+            "carrier": "iCCP",
+            "severity": "unknown"
+          },
+          "module": "M4"
+        },
+        {
+          "code": "color_default_assumption",
+          "expected": {
+            "chrm": true,
+            "gama": true,
+            "rows": 7,
+            "severity": "info",
+            "srgb": false
+          },
+          "module": "M4"
+        }
+      ]
+    },
+    "m5_apng_numframes.png": {
+      "bytes": 209,
+      "sha256": "e2dd0402b3f39bbba8abbed5c13db4cc997dd4ab625685fa2271d5c69325f60a",
+      "triggers": [
+        {
+          "code": "apng_num_frames_mismatch",
+          "expected": {
+            "actual": 2,
+            "declared": 3,
+            "severity": "error"
+          },
+          "module": "M5"
+        }
+      ]
+    },
+    "m5_apng_seq_gap.png": {
+      "bytes": 209,
+      "sha256": "965f14e9c0c1826618cb3861ca2a9cec0c22f366175ad5fcb1fb40289b21b5dc",
+      "triggers": [
+        {
+          "code": "apng_sequence_gap",
+          "expected": {
+            "quote": "no gaps or duplicates",
+            "sequence": [
+              0,
+              3
+            ],
+            "severity": "error"
+          },
+          "module": "M5"
+        }
+      ]
+    },
+    "m5_frames_100ms.apng": {
+      "bytes": 209,
+      "sha256": "391ae8dd565badd8e0bab295d8661648c1a2668e43381314e98b0733846f0672",
+      "triggers": [
+        {
+          "code": "frame_duration_normalized",
+          "expected": {
+            "delay_den": 100,
+            "delay_num": 10,
+            "ms": 100,
+            "raw_unit": "num/den"
+          },
+          "module": "M5"
+        }
+      ]
+    },
+    "m5_frames_100ms.gif": {
+      "bytes": 43,
+      "sha256": "a351ec8d1f2e508c09e5e63bc8e6a160b48f4d278e2a2e1a119aec653d901a4d",
+      "triggers": [
+        {
+          "code": "frame_duration_normalized",
+          "expected": {
+            "ms": 100,
+            "raw": 10,
+            "raw_unit": "1/100s"
+          },
+          "module": "M5"
+        }
+      ]
+    },
+    "m5_frames_100ms.webp": {
+      "bytes": 68,
+      "sha256": "70700ccb0d1313e1e5ba6162c9bff205f38fb2ef48ad5931aa99c135d2d6c737",
+      "triggers": [
+        {
+          "code": "frame_duration_normalized",
+          "expected": {
+            "ms": 100,
+            "raw": 100,
+            "raw_unit": "ms"
+          },
+          "module": "M5"
+        }
+      ]
+    },
+    "m5_gif_delay_ms.gif": {
+      "bytes": 43,
+      "sha256": "ec1abd494b3e79ff43ba820a64ff76644968e05b8a7eb143302fae2fe331a8f4",
+      "triggers": [
+        {
+          "code": "unit_mismatch",
+          "expected": {
+            "expected_ms": 100,
+            "factor": 10,
+            "ms": 1000,
+            "raw": 100,
+            "raw_unit": "1/100s",
+            "severity": "warning"
+          },
+          "module": "M5"
+        }
+      ]
+    },
+    "m5_gif_dispose4.gif": {
+      "bytes": 43,
+      "sha256": "8c50eb45e1234536d068cfb5a2789fe9b19d466f751108241fd164bc4bab01ea",
+      "triggers": [
+        {
+          "code": "gif_disposal_undefined",
+          "expected": {
+            "disposal": 4,
+            "quote": "To be defined",
+            "severity": "warning"
+          },
+          "module": "M5"
+        }
+      ]
+    },
+    "m5_jpeg_app14_pos.jpg": {
+      "bytes": 160,
+      "sha256": "e93a9bb470c99f8bdb4b48eeb6b8b0c5f097730aff85fdc43dad3a188218a6d3",
+      "triggers": [
+        {
+          "code": "jpeg_app14_position",
+          "expected": {
+            "after": "SOS",
+            "segment": "APP14",
+            "severity": "error"
+          },
+          "module": "M5"
+        }
+      ]
+    },
+    "m5_jpeg_progressive_mixed.jpg": {
+      "bytes": 144,
+      "sha256": "3f461dfbf8327c88e76a426351e38fa74cf30d7e1987e580b383d0c0385fd2b5",
+      "triggers": [
+        {
+          "code": "jpeg_segment_order",
+          "expected": {
+            "after": "SOF2",
+            "before": "SOS",
+            "severity": "error"
+          },
+          "module": "M5"
+        }
+      ]
+    },
+    "m5_png_bad_crc.png": {
+      "bytes": 105,
+      "sha256": "a033757944fc6ce1e6f3996a41388a3eab14d7fe041580bec7d1e7f3a489cc87",
+      "triggers": [
+        {
+          "code": "png_crc_mismatch",
+          "expected": {
+            "chunk": "gAMA",
+            "severity": "error"
+          },
+          "module": "M5"
+        }
+      ]
+    },
+    "m5_png_gama_after_idat.png": {
+      "bytes": 105,
+      "sha256": "d6e18dcfe2b99897280b746aff0eea3abf73210d679f0781625ad0574f145661",
+      "triggers": [
+        {
+          "code": "png_chunk_order",
+          "expected": {
+            "chunk": "gAMA",
+            "rule": "before IDAT",
+            "severity": "error"
+          },
+          "module": "M5"
+        }
+      ]
+    },
+    "m5_png_idat_nonconsecutive.png": {
+      "bytes": 156,
+      "sha256": "b0734e8d04052fad7848cb2a6a7d46e2765a2c139888091df4711934975948c6",
+      "triggers": [
+        {
+          "code": "png_idat_nonconsecutive",
+          "expected": {
+            "quote": "Multiple IDAT chunks shall be consecutive",
+            "severity": "error"
+          },
+          "module": "M5"
+        }
+      ]
+    },
+    "m5_png_missing_crc.png": {
+      "bytes": 85,
+      "sha256": "1a716bffa49eb3677ecdc84cb2265a243503edc67bff85cd9037306e19981950",
+      "triggers": [
+        {
+          "code": "png_crc_missing",
+          "expected": {
+            "chunk": "IEND",
+            "quote": "The CRC is always present",
+            "severity": "error"
+          },
+          "module": "M5"
+        }
+      ]
+    },
+    "m5_webp_anim_loop_swap.webp": {
+      "bytes": 70,
+      "sha256": "24c8deae901a02c6b4fa0941755fb366d163f8849b0df38bcf1d0554f4fca7b9",
+      "triggers": [
+        {
+          "code": "webp_anim_structure",
+          "expected": {
+            "chunk": "ANIM",
+            "fields": "Background/Loop swapped",
+            "severity": "error"
+          },
+          "module": "M5"
+        }
+      ]
+    },
+    "m5_webp_anmf_truncated.webp": {
+      "bytes": 68,
+      "sha256": "40e298ab096f16674ce8fe4e97ac2317df04e7ca01927b868ccbd4b2dbc6e47a",
+      "triggers": [
+        {
+          "code": "webp_anmf_truncated",
+          "expected": {
+            "chunk": "ANMF",
+            "declared": 4096,
+            "severity": "error"
+          },
+          "module": "M5"
+        }
+      ]
     }
   },
   "generators": [
-    "fixtures/gen_orientation.py"
+    "fixtures/gen_orientation.py",
+    "fixtures/gen_double_rotate.py",
+    "fixtures/gen_icc.py",
+    "fixtures/gen_container.py"
   ],
   "notes": [
     "structural fixture: pixel data is not decodable (the tool never decodes pixels); all fields the tool reads (tags, offsets, lengths, CRCs, frame timings) are exact",
     "manifest sha256 是 Python 3.12 的冻结值；zlib 输出跨解释器版本可能不同，CI 跨版本只断言解析结果一致，不断言字节哈希一致（plan/05 §四 #4）",
-    "eXIf：PNG 按规范不带 Exif\\0\\0 前缀；另造一份带前缀的样本记录事实（D10）"
+    "eXIf：PNG 按规范不带 Exif\\0\\0 前缀；另造一份带前缀的样本记录事实（D10）",
+    "M4 范围限定：PNG iCCP 首期不解压（unknown: compressed_profile_not_inspected）；三类损坏另造 JPEG APP2 孪生样本证明 error 路径（plan/04 §二 / R5）",
+    "M5 帧时长：同一 100 ms 在 GIF=10(1/100s) / APNG=10/100 / WebP=100(ms) 三格式各一份，归一化后都必须等于 100 ms（data/README §8.3）"
   ],
   "schema": 1
 }

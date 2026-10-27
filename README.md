@@ -50,10 +50,10 @@ imageoracle --help
 
 ```bash
 PYTHONPATH=src py -3.12 -m imageoracle orientation --json path/to/photo.jpg
-PYTHONPATH=src py -3.12 -m imageoracle double-rotate --json path/to/photo.jpg   # 未实现（计划于 M3）
-PYTHONPATH=src py -3.12 -m imageoracle color --json path/to/photo.png           # 未实现（计划于 M4）
-PYTHONPATH=src py -3.12 -m imageoracle container --json path/to/anim.apng       # 未实现（计划于 M5）
-PYTHONPATH=src py -3.12 -m imageoracle consumers --json path/to/photo.jpg       # 未实现（计划于 M6）
+PYTHONPATH=src py -3.12 -m imageoracle double-rotate --json path/to/photo.jpg    # M3 已实现
+PYTHONPATH=src py -3.12 -m imageoracle color --json path/to/photo.png           # M4 已实现
+PYTHONPATH=src py -3.12 -m imageoracle container --json path/to/anim.apng       # M5 已实现
+PYTHONPATH=src py -3.12 -m imageoracle consumers --json path/to/photo.jpg       # M6 已实现：9×6 消费者矩阵
 ```
 
 退出码：`0` 无风险 / `1` 有 warning / `2` 有 error 或不可判 / `3` 输入不可解析。
@@ -62,7 +62,7 @@ PYTHONPATH=src py -3.12 -m imageoracle consumers --json path/to/photo.jpg       
 ## 开发
 
 ```bash
-py -3.12 -m unittest discover -s tests -t .    # 全量测试（54 项，零依赖）
+py -3.12 -m unittest discover -s tests -t .    # 全量测试（222 项，零依赖）
 py -3.12 tools/check_sprint_layout.py          # 布局门（方法论装订）
 py -3.12 tools/check_desensitized.py           # 脱敏门
 py -3.12 tools/verify_gates.py                 # 两道门的变异验证（18 组必须全部如期变红/绿）
@@ -71,8 +71,8 @@ py -3.12 tools/verify_gates.py                 # 两道门的变异验证（18 �
 **前置条件**：样本不入仓（隐私红线 + 生成物纪律），想就地复算需要先跑生成器：
 
 ```bash
-py -3.12 fixtures/gen_orientation.py           # 写到 fixtures/out/，并更新 fixtures/manifest.json
-py -3.12 fixtures/gen_orientation.py --check   # 只校验：内存重生成 vs manifest（+ 冻结产物，若在）
+py -3.12 fixtures/gen_all.py           # 生成全部 54 个样本到 fixtures/out/，并汇写 fixtures/manifest.json
+py -3.12 fixtures/gen_all.py --check   # 只校验：四族内存重生成 vs manifest（+ 冻结产物，若在）
 ```
 
 ## 仓库结构
@@ -88,14 +88,14 @@ py -3.12 fixtures/gen_orientation.py --check   # 只校验：内存重生成 vs 
 | 里程碑 | 状态 | 备注 |
 |---|---|---|
 | M0 | ✅ | 计划套件 + 装订 + 骨架 + 两道门（本地等价校验） |
-| M1 | ⬜ | 数据先行：fixtures 生成器 |
-| M2 | ⬜ | `orientation` 判定器 |
-| M3 | ⬜ | 双重旋转探测器 |
-| M4 | ⬜ | `color` 体检器 |
-| M5 | ⬜ | `container` 校验器 |
-| M6 | ⬜ | `consumers` 矩阵 + 发布 |
+| M1 | ✅ | 数据先行：fixtures 生成器（四族 54 样本 + 冻结 manifest） |
+| M2 | ✅ | `orientation` 判定器（22 份样本逐条对账，本地等价校验） |
+| M3 | ✅ | 双重旋转探测器（IFD1 未同步 / XMP 残留 / 大边启发式，本地等价校验） |
+| M4 | ✅ | `color` 体检器（ICC 载体 + 128B 头 + 默认假设表 7 行，本地等价校验） |
+| M5 | ✅ | `container` 校验器（PNG/APNG/WebP/GIF/JPEG 结构 + 帧时长归一化，本地等价校验） |
+| M6 | ⬜ | `consumers` 矩阵（本地交付完成，见 `plan/RELEASE-M6.md`）；**发布动作未执行**（未建远端） |
 
-版本：`0.1.0`（未发布）。CI：工作流已就位，**未接远端，待首推验证**。
+版本：`0.5.0`（未发布）。CI：工作流已就位，**未接远端，待首推验证**。
 
 ## 许可
 

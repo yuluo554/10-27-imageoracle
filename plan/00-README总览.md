@@ -85,6 +85,7 @@
 | 9 条 0 结果检索 | `gh api` search/repositories，窗口 2026-10-27T10:56Z–11:17Z | ⬜ 软论据（可复现但非强论据） |
 | $3,000 悬赏 | margelo/react-native-vision-camera#1891 | ✅ |
 | image-size 是否应用 orientation | 原文未取 | ⬜ |
+| consumers 矩阵每行有依据（题目 M5 出口门） | `tests/test_m6_consumers.py` 逐格对账 §1.13/§8.9 + `selftest_evidence_complete`；2 行 `tool-doc` 带已复核 URL（§3.1） | ✅ |
 | Safari PNG `iCCP` 行为 | lr0 单来源 | ⬜ |
 
 ---
@@ -96,12 +97,12 @@
 | 里程碑 | 内容 | DoD（完成定义） | 状态 |
 |---|---|---|---|
 | M0 | 计划与骨架：计划套件 `plan/00–06` + 方法论装订（`AGENTS.md` + 两道门）+ 包骨架 + CI | 布局门与脱敏门可跑且变异验证通过；`py -3.12 -m unittest` 绿；`imageoracle --help` 可跑 | ✅ |
-| M1 | 数据先行：纯 Python 字节构造全部 fixture（不依赖 exiftool/jpegtran/sharp）；`fixtures/manifest.json` 落 `sha256` 与"触发哪条验收项" | 生成器 `--check` 位级一致（冻结产物 + 重生成两层都断言）；manifest 哈希稳定；每个样本写明触发项 | ⬜ |
-| M2 | `orientation` 判定器（题目 M1）：JPEG/TIFF/PNG `eXIf`/WebP `EXIF` 的 tag 274 + XMP，8 元变换矩阵与有效宽高 | 8 值逐项对 ExifTool 语义；**6=CW90 单测绿**；5/6/7/8 交换 W/H；`absent` 与 `=1` 分列 | ⬜ |
-| M3 | 双重旋转探测器（题目 M2）：IFD1≠IFD0 / XMP 冲突 / 宽高启发式（只出 `suspicion`） | 复现 sharp #4585（EXIF=1、XMP=N）与 jpegtran `-copy all`（IFD1 未同步）；`certain`/`heuristic` 分列 | ⬜ |
-| M4 | `color` 体检器（题目 M3）：ICC 存在性 + 128B 头逐字段 + `iCCP↔sRGB` + 默认假设表 | lr0 形态复现；截断/`size` 错/`acsp` 坏三类各命中；默认假设表逐行带 `source` | ⬜ |
-| M5 | `container` 校验器（题目 M4）：PNG chunk 顺序/CRC/IDAT 连续、APNG 序号、WebP ANMF、GIF disposal、JPEG 段序、跨格式帧时长 | 每类 2 例；100 ms 三格式归一化相等；错写报 `unit_mismatch`；CRC 已知向量单测 | ⬜ |
-| M6 | `consumers` 矩阵 + 发布（题目 M5）：消费者矩阵 + 处理前后 diff + 退出码；发布 GitHub 公开仓库 | 每行 `evidence` 齐（`selftest_evidence_complete` 绿）；≥4 条加工命令 diff；tag + Release + 发布留档三件套 | ⬜ |
+| M1 | 数据先行：纯 Python 字节构造全部 fixture（不依赖 exiftool/jpegtran/sharp）；`fixtures/manifest.json` 落 `sha256` 与"触发哪条验收项" | 生成器 `--check` 位级一致（冻结产物 + 重生成两层都断言）；manifest 哈希稳定；每个样本写明触发项 | ✅ |
+| M2 | `orientation` 判定器（题目 M1）：JPEG/TIFF/PNG `eXIf`/WebP `EXIF` 的 tag 274 + XMP，8 元变换矩阵与有效宽高 | 8 值逐项对 ExifTool 语义；**6=CW90 单测绿**；5/6/7/8 交换 W/H；`absent` 与 `=1` 分列 | ✅ |
+| M3 | 双重旋转探测器（题目 M2）：IFD1≠IFD0 / XMP 冲突 / 宽高启发式（只出 `suspicion`） | 复现 sharp #4585（EXIF=1、XMP=N）与 jpegtran `-copy all`（IFD1 未同步）；`certain`/`heuristic` 分列 | ✅ |
+| M4 | `color` 体检器（题目 M3）：ICC 存在性 + 128B 头逐字段 + `iCCP↔sRGB` + 默认假设表 | lr0 形态复现；截断/`size` 错/`acsp` 坏三类各命中；默认假设表逐行带 `source` | ✅ |
+| M5 | `container` 校验器（题目 M4）：PNG chunk 顺序/CRC/IDAT 连续、APNG 序号、WebP ANMF、GIF disposal、JPEG 段序、跨格式帧时长 | 每类 2 例；100 ms 三格式归一化相等；错写报 `unit_mismatch`；CRC 已知向量单测 | ✅ |
+| M6 | `consumers` 矩阵 + 发布（题目 M5）：9×6 消费者矩阵 + 13 条风险 + 6 条加工 diff；发布 GitHub 公开仓库 | 每行 `evidence` 齐（`selftest_evidence_complete` 绿）；≥4 条加工命令 diff —— **本地已达成**；tag + Release + 发布留档三件套 = **未执行**（待授权，见 `plan/RELEASE-M6.md`） | ⬜ |
 
 > M1 排在实现之前是刻意的：样本先于判定器，才能避免"探测器按样本实现"的循环论证。每个模块实现前先跑 M1 样本确认基线。
 

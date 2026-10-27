@@ -107,6 +107,8 @@ class Frame:
     raw_duration: int | None
     raw_unit: str                # "1/100s" | "num/den" | "ms" | "not-in-band"
     dispose: int | None = None
+    #: APNG 的 `delay_den`（其余格式为 None）。保留原始分母，报告里才能给出 10/100 这一对。
+    raw_den: int | None = None
 
 
 @dataclass

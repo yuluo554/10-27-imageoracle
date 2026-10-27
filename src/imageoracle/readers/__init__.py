@@ -52,9 +52,10 @@ def read(path: str | Path) -> Container:
         container.image_info = info
         _collect_jpeg_metadata(container, segments)
     elif kind == "png":
-        chunks, info = png_reader.parse(data)
+        chunks, info, frames = png_reader.parse(data)
         container.chunks = chunks
         container.image_info = info
+        container.frames = frames
         _collect_png_metadata(container, chunks)
     elif kind == "webp":
         chunks, info, frames = webp_reader.parse(data)
@@ -71,6 +72,7 @@ def read(path: str | Path) -> Container:
         block = tiff_reader.parse(data, container="tiff", base_offset=0)
         container.exif.append(block)
         container.image_info = _tiff_image_info(block, tiff_reader)
+        _collect_tiff_icc(container, block, tiff_reader)
     else:  # pragma: no cover - sniff 已穷举
         raise UnsupportedFormat(kind)
 
@@ -157,6 +159,17 @@ def _collect_webp_metadata(container: Container, chunks) -> None:
             container.xmp.append(
                 XmpBlock(container="webp", offset=chunk.data_offset, text=text)
             )
+
+
+def _collect_tiff_icc(container: Container, block: ExifBlock, reader) -> None:
+    """TIFF 的 ICC 载在 tag 34675 上（`data/README` §1.11 四种载体之一）。"""
+    for ifd in block.ifds:
+        entry = reader.get_entry(ifd, reader.TAG_ICC_PROFILE)
+        if entry is not None and entry.raw_value:
+            container.icc = IccRef(
+                container="tiff", carrier="tag34675", segments=(entry,), compressed=False
+            )
+            return
 
 
 def _tiff_image_info(block: ExifBlock, reader) -> object:
