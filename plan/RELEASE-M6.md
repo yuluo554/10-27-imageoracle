@@ -35,11 +35,11 @@
 | 3. 建 GitHub 公开仓库 | <https://github.com/yuluo554/10-27-imageoracle>（`gh repo create --public`） | ✅ |
 | 4. `push` | `origin/main`（`312d8ea`→`b92a767`→…），`origin/v0.5.0`，`origin/v0.5.1` | ✅ |
 | 5. `git archive` 附件 | `v0.5.0`：`imageoracle-v0.5.0.tar.gz`，**215387 字节**，sha256 `30351fed8c7b77e1cd817d36999dab029effd5dedf69a78a1bcc476e5b4cf15c`（两次构建 `cmp` 逐字节相同）；`v0.5.1`：见下一行回填 | ✅ / ⬜ |
-| 5b. v0.5.1 附件 sha256 | ⬜ **tag 之后回填**（该值不能出现在 tag 树内，自指失效） | ⬜ |
+| 5b. v0.5.1 附件 sha256 | `imageoracle-v0.5.1.tar.gz`，**217536 字节**，sha256 `b4e327f3eb38cda80d6a57ecec7812297d77f64d5427ee234fb8241c9ebe5642`（两次构建 `cmp` 逐字节相同） | ✅（tag 之后回填：该值不能出现在 tag 树内） |
 | 6. `gh release create` | `v0.5.0` → <https://github.com/yuluo554/10-27-imageoracle/releases/tag/v0.5.0>（正文含附件 sha256）；`v0.5.1` → 见 6b | ✅ / ⬜ |
-| 6b. v0.5.1 Release | ⬜ **tag 之后回填 URL**；并给 v0.5.0 的正文加一行"已被 v0.5.1 取代（仅 CI 配置修复，`src/` 未变）" | ⬜ |
-| 7. Actions run id | **main**：`40530041670` = **failure**（首推，暴露三处配置缺陷）；`40530725648` = **success（7/7 job）**。**tag v0.5.0**：`40530040806` = **failure**（同上，tag 树内是旧版 `ci.yml`）。**tag v0.5.1**：⬜ 回填 | ⬜ v0.5.1 |
-| 8. `git log --oneline v0.5.1..HEAD` 逐条核对 | 只允许非交付面（`plan/`、`docs/`、`tests/`、`tools/`、`README.md`、`AGENTS.md`）；`CHANGELOG.md` 按"文档面"处置并在提交信息里写明 | ⬜ 待回填提交后核对 |
+| 6b. v0.5.1 Release | <https://github.com/yuluo554/10-27-imageoracle/releases/tag/v0.5.1>；v0.5.0 的正文已加"已被 v0.5.1 取代（仅 CI 配置修复，`src/` 未变）" | ✅（tag 之后回填） |
+| 7. Actions run id | **main**：`40530041670` = **failure**（首推，暴露三处配置缺陷）；`40530725648` = **success（7/7）**（`b92a767`）；`40532561921` = **success（7/7）**（`v0.5.1` 提交）。**tag v0.5.0**：`40530040806` = **failure**（tag 树内是旧版 `ci.yml`）。**tag v0.5.1**：`40532972661` = **success（7/7）** | ✅ |
+| 8. `git log --oneline v0.5.1..HEAD` 逐条核对 | 发布后只剩"§二 回填 + 收官交接单同步"这一个提交，只动 `plan/`（非交付面） | ✅ |
 
 **首推暴露的三处 CI 配置缺陷（修复提交 `b92a767`，只动 `.github/`）**
 
