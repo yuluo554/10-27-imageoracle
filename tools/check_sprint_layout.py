@@ -16,6 +16,7 @@ CLI:  py -3.12 tools/check_sprint_layout.py [--root <dir>]
   LAYOUT.GAPS         缺口表不得再提已成 ✅ 的里程碑
   LAYOUT.LEDGER       承诺-证据台账不得挂已 ✅ 里程碑的未完成标记
   LAYOUT.RELEASE      发布留档（仅在发布里程碑 ✅ 后要求；未完成时报"不适用"）
+  LAYOUT.RELEASE_PLACEHOLDER 发布留档里不得残留尖括号版本占位符（`<v0.5.1>` 这类）
   LAYOUT.DOC_TOOLS    文档点名的 tools/ 脚本必须有实物
   LAYOUT.GATE_SELFTEST 本次运行确实读过文件（非空跑自证）
 
@@ -102,6 +103,16 @@ HANDOFF_FORMAT_FROM = 1  # 从 M1 起必须七节齐
 HANDOFF_EXEMPT_LAST = False  # 末棒也要交接单（写成"收官交接单"）
 
 RELEASE_MILESTONE = 6  # 本项目的发布里程碑；未 ✅ 时报"尚不适用"
+
+#: 发布留档里的**尖括号版本占位符**（`<v0.5.1>` / `<0.5.2>` / `< 1.2.3 >`）。
+#:
+#: 为什么单独一条判据（本项目已发生的真缺陷）：`plan/RELEASE-M6.md` 第 33/34 行的提交号
+#: 从未回填，而本仓的发布物 = `git archive`（留档逐字节进附件）⇒ 占位符随 tag 树与
+#: Release 附件一起发了出去。`LAYOUT.RELEASE` 只判"两栏 / 覆盖对账小节 / 三态行数"，
+#: 对占位符完全无感。注意**不能**把 `<https://…>` 之类链接误判：正则要求尖括号内
+#: 只有一个版本号。
+RELEASE_PLACEHOLDER = re.compile(r"<\s*v?\d+\.\d+\.\d+\s*>")
+RELEASE_GLOB = "RELEASE-M*.md"
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -371,6 +382,36 @@ def check_release(g: Gate, done: list[int], all_milestones: list[int]) -> None:
     g.add("LAYOUT.RELEASE", True, "WRAPUP 形态")
 
 
+def check_release_placeholder(g: Gate) -> None:
+    """发布留档里不得残留尖括号版本占位符。
+
+    扫描面 = `plan/RELEASE-M*.md`（**不依赖**里程碑是否 ✅：v0.5.1 的教训是"留档写了、
+    里头的提交号没回填"，而当时状态副本已经全 ✅ 了，`LAYOUT.RELEASE` 依然全绿）。
+    逐文件逐行找，命中即 FAIL 并点名 `文件:行`。
+    """
+    paths = sorted(g.root.glob(f"plan/{RELEASE_GLOB}"))
+    if not paths:
+        g.add(
+            "LAYOUT.RELEASE_PLACEHOLDER",
+            False,
+            f"扫到 0 份 plan/{RELEASE_GLOB}——判据空跑（留档搬走了？）",
+        )
+        return
+    hits: list[str] = []
+    for path in paths:
+        rel = path.relative_to(g.root).as_posix()
+        text = g.read(rel) or ""
+        for lineno, line in enumerate(text.splitlines(), start=1):
+            m = RELEASE_PLACEHOLDER.search(line)
+            if m:
+                hits.append(f"{rel}:{lineno} {m.group(0)}")
+    g.add(
+        "LAYOUT.RELEASE_PLACEHOLDER",
+        not hits,
+        "；".join(hits) if hits else f"{len(paths)} 份发布留档，0 处版本占位符",
+    )
+
+
 def check_documented_tools(g: Gate, done: list[int]) -> None:
     """文档点名的 tools/ 脚本必须有实物。三个状态：在位 / 待里程碑（显式登记） / 缺失。
 
@@ -458,6 +499,7 @@ def main(argv: list[str] | None = None) -> int:
         lambda: check_gaps(g, done),
         lambda: check_ledger(g, done),
         lambda: check_release(g, done, all_milestones),
+        lambda: check_release_placeholder(g),
         lambda: check_documented_tools(g, done),
     ):
         try:

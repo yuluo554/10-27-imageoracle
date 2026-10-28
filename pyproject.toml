@@ -1,26 +1,25 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "imageoracle"
-version = "0.5.1"                     # 唯一定义处之二；与 src/imageoracle/__init__.py 必须一致（测试断言）
+version = "0.5.2"                     # 唯一定义处之二；与 src/imageoracle/__init__.py 必须一致（测试断言）
 description = "ImageOracle：图像呈现预言机（只读字节，预言各软件会显示成什么样）"
 readme = "README.md"
-requires-python = ">=3.10"
-license = { text = "MIT" }
+requires-python = ">=3.12"
+license = "MIT"                       # PEP 639 SPDX 表达式；旧写法 { text = "MIT" } 于 2027-02-18 硬截止
+license-files = ["LICENSE"]
 authors = [{ name = "yuluo554", email = "282769740+yuluo554@users.noreply.github.com" }]
 keywords = ["exif", "orientation", "icc", "png", "apng", "webp", "gif", "metadata", "cli"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Environment :: Console",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Multimedia :: Graphics",
     "Typing :: Typed",
 ]

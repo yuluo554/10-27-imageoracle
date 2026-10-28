@@ -11,7 +11,7 @@ __all__ = ["__version__", "TOOL_NAME", "SCHEMA_VERSION"]
 
 # 版本号唯一定义处之一；另一处是 pyproject.toml 的 [project].version。
 # tools + tests 断言两处一致（plan/06 D12）。
-__version__ = "0.5.1"
+__version__ = "0.5.2"
 
 TOOL_NAME = "imageoracle"
 

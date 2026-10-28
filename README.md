@@ -27,7 +27,7 @@ Windows 照片 / ImageMagick / libvips / sharp / exiftran 里会显示成什么�
 
 ## 安装
 
-需要 Python ≥ 3.10（开发与冻结值用 3.12）。**零第三方依赖**。
+需要 Python ≥ 3.12（开发与冻结值也用 3.12）。**零第三方依赖**。
 
 ```bash
 git clone https://github.com/yuluo554/10-27-imageoracle && cd 10-27-imageoracle
@@ -62,10 +62,10 @@ PYTHONPATH=src py -3.12 -m imageoracle consumers --json path/to/photo.jpg       
 ## 开发
 
 ```bash
-py -3.12 -m unittest discover -s tests -t .    # 全量测试（222 项，零依赖）
+py -3.12 -m unittest discover -s tests -t .    # 全量测试（226 项，零依赖）
 py -3.12 tools/check_sprint_layout.py          # 布局门（方法论装订）
 py -3.12 tools/check_desensitized.py           # 脱敏门
-py -3.12 tools/verify_gates.py                 # 两道门的变异验证（18 组必须全部如期变红/绿）
+py -3.12 tools/verify_gates.py                 # 两道门的变异验证（19 组必须全部如期变红/绿）
 ```
 
 **前置条件**：样本不入仓（隐私红线 + 生成物纪律），想就地复算需要先跑生成器：
@@ -93,9 +93,9 @@ py -3.12 fixtures/gen_all.py --check   # 只校验：四族内存重生成 vs ma
 | M3 | ✅ | 双重旋转探测器（IFD1 未同步 / XMP 残留 / 大边启发式，本地等价校验） |
 | M4 | ✅ | `color` 体检器（ICC 载体 + 128B 头 + 默认假设表 7 行，本地等价校验） |
 | M5 | ✅ | `container` 校验器（PNG/APNG/WebP/GIF/JPEG 结构 + 帧时长归一化，本地等价校验） |
-| M6 | ✅ | `consumers` 矩阵 + 发布（v0.5.0 首发、v0.5.1 CI 修复；留档见 `plan/RELEASE-M6.md`） |
+| M6 | ✅ | `consumers` 矩阵 + 发布（v0.5.0 首发、v0.5.1 CI 修复、v0.5.2 留档收口；留档见 `plan/RELEASE-M6.md`） |
 
-版本：`0.5.1`。CI：已接远端，`main` 上 7/7 job 全绿（run `40530725648`）；v0.5.0 的 tag run 失败经过与修复记在 `plan/RELEASE-M6.md` §二。
+版本：`0.5.2`。CI：已接远端，`main` 上 7/7 job 全绿（run `40530725648`）；v0.5.0 的 tag run 失败经过与修复记在 `plan/RELEASE-M6.md` §二。
 
 ## 许可
 

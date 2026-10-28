@@ -82,9 +82,19 @@ class TestWorkflowShape(unittest.TestCase):
                 self.assertIn(f"python {needle}", self.text)
 
     def test_matrix_covers_python_floor_and_dev_version(self) -> None:
-        self.assertIn('python: ["3.10", "3.12"]', self.text)
+        # 合法口径调整（DEC6=乙）：Python 3.10 / 3.11 已 EOL，floor 抬到 3.12，
+        # 矩阵随之从 ["3.10","3.12"] 改为 ["3.12","3.13"]。判据仍是"矩阵必须同时覆盖
+        # 最低支持版本与一个更高版本"，只是那两个字符串跟着 floor 走。
+        self.assertIn('python: ["3.12", "3.13"]', self.text)
         self.assertIn("ubuntu-latest", self.text)
         self.assertIn("windows-latest", self.text)
+
+    def test_workflow_has_no_deprecated_actions(self) -> None:
+        """actions 必须用 v7（v4/v5 会触发 Node20 弃用注解，且依赖旧的 runner 契约）。"""
+        self.assertNotIn("actions/checkout@v4", self.text)
+        self.assertNotIn("actions/setup-python@v5", self.text)
+        self.assertIn("actions/checkout@v7", self.text)
+        self.assertIn("actions/setup-python@v7", self.text)
 
     def _top_level_block(self, key: str) -> list[str]:
         collecting = False

@@ -39,6 +39,9 @@ SKIP_DIRS = {
     ".git", "node_modules", "build", "dist", "__pycache__", ".pytest_cache",
     ".mypy_cache", ".venv", "venv", "env", ".tox", "out", "fixtures/out",
     ".mimosa", ".idea", ".vscode", "htmlcov", ".hypothesis", "site-packages",
+    # 二次迭代交接物（诊断/路线/执行记录）：与 .gitignore 的 `update/` 成对。
+    # 只 ignore 不跳过 = 门仍会扫到并因本机路径报红（本仓第一版诊断撞过 10 处）。
+    "update",
 }
 SKIP_SUFFIXES = (".egg-info", ".dist-info")
 

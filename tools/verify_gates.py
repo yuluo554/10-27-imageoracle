@@ -15,8 +15,9 @@
     L8  往缺口格写已 ✅ 的里程碑号          → LAYOUT.GAPS 红
     L9  往台账某条挂 ⬜ 待 M<已✅>           → LAYOUT.LEDGER 红
     L10 文档点名一个不存在的 tools/ 脚本    → LAYOUT.DOC_TOOLS 红
-    L11 把发布里程碑翻 ✅ 但不写留档         → LAYOUT.RELEASE 红
+    L11 改坏留档里的「覆盖对账」小节标题     → LAYOUT.RELEASE 红
     L12 删某一节的必需小节关键词             → LAYOUT.SECTIONS 红
+    L13 往留档插一个 `<v0.5.2>` 版本占位符   → LAYOUT.RELEASE_PLACEHOLDER 红
 
   脱敏门（check_desensitized.py）
     D1  写入盘符绝对路径                    → absolute-session-path 红
@@ -177,6 +178,7 @@ def expect(
     note: str,
     want_red: bool = True,
     fail_id: str | None = None,
+    only_this_red: bool = False,
 ) -> tuple[bool, str]:
     """对一次变异断言门的**退出码**，并（可选）断言**到底是哪条判据**红了。
 
@@ -184,6 +186,10 @@ def expect(
     把淘汰赛写成"命中列表为空"等于同时断言了所有判据。例如"发布里程碑 ✅ 但无留档"
     若只改一个副本，`LAYOUT.STATUS` 会先红，看起来像 RELEASE 判据生效，其实不是。
     传了 `fail_id` 就只认那一条：目标判据没红 = 这条变异没验到东西。
+
+    `only_this_red=True` 再加一层（本轮 B1 起用）：目标判据红了之外，**其它判据必须
+    一条都没红**。理由：L11 的旧写法只要"门返回非 0"就算过，而"删掉整份留档"会让
+    FILES 之外的判据连带变红，等于用一条变异冒充多条判据的覆盖——变异要指哪打哪。
     """
     mutation.apply()
     try:
@@ -192,13 +198,16 @@ def expect(
         mutation.restore()
     ok = (rc != 0) if want_red else (rc == 0)
     detail = f"rc={rc}"
-    if ok and fail_id:
+    if fail_id:
         red_ids = [line.split()[1] for line in out.splitlines() if line.startswith("FAIL  ")]
-        if fail_id not in red_ids:
+        if ok and fail_id not in red_ids:
             ok = False
             detail += f", 但 {fail_id} 未红（红的是 {red_ids or '无'}）"
-        else:
+        elif ok:
             detail += f", {fail_id} 已红"
+            if only_this_red and red_ids != [fail_id]:
+                ok = False
+                detail += f"，但连带变红的还有 {[r for r in red_ids if r != fail_id]}"
     return ok, f"{'OK' if ok else 'FALSE-GATE'}  {note}  ({detail})"
 
 
@@ -366,12 +375,43 @@ def layout_cases(results: list[tuple[bool, str]]) -> None:
         )
     )
 
-    # L11：发布里程碑在**全部副本**翻 ✅ 但没有留档 → 只应 RELEASE 红（STATUS 不该红）
+    # L11：改坏留档里的「覆盖对账」小节标题 → 只应 RELEASE 红。
+    #
+    # 历史（本条曾经是永久 SKIP）：旧写法依赖"删掉整份 plan/RELEASE-M6.md"，
+    # 而它只能造出靶子的前提是**M6 仍是 ⬜**——M6 翻 ✅ 且留档落地后，
+    # `release_doc.is_file()` 恒真，于是这条变异被永久 SKIP，`LAYOUT.RELEASE`
+    # 从此没有任何变异覆盖（诊断 D3）。现在靶子改成"留档内部的小节标题"，
+    # 与里程碑状态解耦：把 `## 三、…覆盖对账` 的标题词改掉，`heading` 判据即红。
     release_milestone = 6
     release_doc = ROOT / "plan" / f"RELEASE-M{release_milestone}.md"
     if release_doc.is_file():
-        results.append((True, "SKIP-L11  留档已存在，本条不适用"))
+        release_text = release_doc.read_text(encoding="utf-8")
+        heading = next(
+            (
+                line
+                for line in release_text.splitlines()
+                if re.match(r"^#{2,3}.*覆盖对账", line)
+            ),
+            None,
+        )
+        if heading:
+            results.append(
+                expect(
+                    gate,
+                    Mutation(
+                        f"plan/RELEASE-M{release_milestone}.md",
+                        heading,
+                        heading.replace("覆盖对账", "出口门清单"),
+                    ),
+                    note="L11 改坏留档的『覆盖对账』小节标题 → RELEASE 红",
+                    fail_id="LAYOUT.RELEASE",
+                    only_this_red=True,
+                )
+            )
+        else:
+            results.append((False, "SKIP-L11  留档里找不到『覆盖对账』小节标题（判据面变了？）"))
     else:
+        # 留档确实不存在时，退回"激活里程碑"形态（仍要验到判据，不静默跳过）
         try:
             results.append(
                 expect(
@@ -383,6 +423,34 @@ def layout_cases(results: list[tuple[bool, str]]) -> None:
             )
         except AssertionError as exc:
             results.append((False, f"SKIP-L11  构造不出靶子: {exc}"))
+
+    # L13：往留档里插一个尖括号版本占位符 → RELEASE_PLACEHOLDER 红。
+    # 靶子取"一张表格行"的末尾追加，避免插在代码块/引用块里造成别的判据连带变红。
+    if release_doc.is_file():
+        anchor = "| 8. `git log --oneline"
+        release_text = release_doc.read_text(encoding="utf-8")
+        anchor_line = next(
+            (line for line in release_text.splitlines() if line.startswith(anchor)), None
+        )
+        if anchor_line:
+            results.append(
+                expect(
+                    gate,
+                    Mutation(
+                        f"plan/RELEASE-M{release_milestone}.md",
+                        anchor_line,
+                        anchor_line
+                        + "\n| 9. 追加行 | `v0.5.2` → `<v0.5.2>`（占位未回填） | ⬜ |",
+                    ),
+                    note="L13 留档插入 <v0.5.2> 占位符 → RELEASE_PLACEHOLDER 红",
+                    fail_id="LAYOUT.RELEASE_PLACEHOLDER",
+                    only_this_red=True,
+                )
+            )
+        else:
+            results.append((False, "SKIP-L13  留档里找不到可追加的锚行"))
+    else:
+        results.append((False, f"SKIP-L13  plan/RELEASE-M{release_milestone}.md 不存在"))
 
 
 def desens_cases(results: list[tuple[bool, str]]) -> None:

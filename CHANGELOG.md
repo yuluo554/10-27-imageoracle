@@ -2,7 +2,54 @@
 
 本项目遵循 [Semantic Versioning](https://semver.org/)；日期为 UTC。
 
-## [Unreleased] — v0.5.1
+## [0.5.2] — 2026-10-28
+
+### 发布留档收口 + 门自证咬合力 + 元数据现代化（2026-10-28，二次迭代）
+
+- **修 `plan/RELEASE-M6.md` §二 两个从未回填的 `<v0.5.1>` 占位符** → 真实提交号 `0c82df1`。
+  这两个占位符此前随 `v0.5.1` 的 tag 树与 Release 附件一起发了出去（本仓发布物 = `git archive`，
+  留档逐字节进附件），任何下载源码包的人都会读到。
+- **修 CHANGELOG 与已发布事实相反的一段**：原本写"tag / 公开仓库 / Release 未执行（发布动作待显式授权）"，
+  而两条 Release 早已发布。改为历史事实叙述（M6 交付时尚未执行，随后完成）。
+- **CHANGELOG 结构收口**：`## [Unreleased] — v0.5.1` 拆成 `## [0.5.1]` 与 `## [0.5.0]` 两个已发布段
+  （最新在前），历史小节原文与日期一字未动。
+- **新增判据 `LAYOUT.RELEASE_PLACEHOLDER`**：扫 `plan/RELEASE-M*.md` 里的尖括号版本占位
+  （`<v0.5.1>` 这类），命中即 FAIL 并点名 `文件:行`。配一组变异 `L13`（往留档插 `<v0.5.2>` → 该判据红）。
+- **`verify_gates.py` 的 `L11` 恢复咬合力**：旧写法"删掉整份留档"只能在 M6 仍为 ⬜ 时造出靶子，
+  M6 一 ✅ 就永久 SKIP（`LAYOUT.RELEASE` 因此没有任何变异覆盖）。改为"改坏留档里的『覆盖对账』
+  小节标题"，与里程碑状态解耦；并给 `expect()` 加 `only_this_red` 断言（变异必须指哪打哪）。
+  门自证从 **18/18（含 1 条永久 SKIP）** 变为 **19/19（SKIP = 0）**。
+- **自述测试数有了门**（`tests/test_reported_counts.py`，3 条）：子进程真跑 `unittest discover`
+  取 `Ran N tests`，与文档里的每一处"当前条数"声明逐条比对；另有旧值化石检测与阴性对照。
+  条数从 222 → **226**（+3 守门 +1 CI action 版本断言）。
+- **元数据**：`license = { text = "MIT" }` + License classifier → PEP 639 SPDX
+  （`license = "MIT"` + `license-files = ["LICENSE"]`，删 classifier，`setuptools>=77`）。
+  构建告警从 2 类（各多次）→ **0**。
+- **Python floor `>=3.10` → `>=3.12`**（3.10 已于 2026-10-01 EOL）；classifier 删 3.10/3.11；
+  CI 矩阵 `["3.10","3.12"]` → `["3.12","3.13"]`，并同步改 `tests/test_ci_workflow.py` 的断言字符串。
+- **actions 升 v7**：`actions/checkout@v4` → `@v7`、`actions/setup-python@v5` → `@v7`（消除 Node20 弃用注解），
+  新增 `test_workflow_has_no_deprecated_actions` 守住。
+- **`update/` 收编**：`.gitignore` 加 `update/`，`tools/check_desensitized.py` 的 `SKIP_DIRS` 加 `"update"`
+  （成对；只 ignore 不跳过会让脱敏门每次诊断都报红）。
+- GitHub topics 从 `[]` 填为 9 个（exif / orientation / icc / png / apng / webp / gif / metadata / cli）。
+- **未做**：`src/imageoracle/` 一行未改；fixtures 与 `fixtures/manifest.json` 未改（`--check` 仍"一致"）；
+  `v0.5.0` / `v0.5.1` 的 tag、Release 正文与失败 run 记录一字未动。
+
+## [0.5.1] — 2026-10-27
+
+### v0.5.1 —— CI 首推修复（2026-10-27）
+
+- **只动 `.github/`**：`src/` 与 `pyproject.toml` 的代码面与 v0.5.0 相同（版本号除外）。
+- 首推实测暴露的三处 CI 配置缺陷（这正是 `plan/05` §四 #1 写"CI 待首推验证"的原因）：
+  1. CLI smoke 报 `No module named imageoracle` —— 本仓是 `src` 布局、不装包 → job 级 `PYTHONPATH=src`；
+  2. `windows-latest` 上门的四字节中文输出触发 `UnicodeEncodeError: 'charmap'` →
+     `PYTHONUTF8=1` + `PYTHONIOENCODING=utf-8`；
+  3. 零依赖断言把 `__main__`（解释器自身）与 `_distutils_hack`（setuptools site hook，3.10 上出现）
+     当成第三方 → 用 `python -S` 并显式排除 `__main__`；offline 镜像补 `ENV PYTHONPATH=/work/src`。
+- 修复后 `main` 的 CI 全绿（7/7 job）。v0.5.0 的 tag run 失败记录保留在 `plan/RELEASE-M6.md` §二，
+  **不删、不改写**已公开的历史；v0.5.0 的 Release 正文加一行"已被 v0.5.1 取代"。
+
+## [0.5.0] — 2026-10-27
 
 ### M0 计划与骨架（2026-10-27）
 
@@ -148,23 +195,11 @@
 - 测试：`tests/test_m6_consumers.py`（42 项：§1.13/§8.9 三张表逐格对账 + 矩阵/风险/diff 形态 +
   54 份样本逐个跑真 CLI + 缺证据反证 + 接线）；全量 **222 项** `unittest` 绿。
   **版本升到 `0.5.0`**（交付面变更）。
-- **发布状态**：`plan/RELEASE-M6.md` 已写（§一 tag 前事实 / §二 tag 后待回填 / §三 出口门对账）；
-  **tag / 公开仓库 / Release 未执行**（本机无远端，发布动作待显式授权）。三处状态副本的 M6
-  因此保持 ⬜——不把"未执行"写成已完成。
+- **发布状态**：`plan/RELEASE-M6.md` 已写（§一 tag 前事实 / §二 tag 后回填 / §三 出口门对账）。
+  （M6 交付时）tag / 公开仓库 / Release 尚未执行；随后在 `0c82df1` 之前完成
+  （`v0.5.0` → `312d8ea`、`v0.5.1` → `0c82df1`，两条 Release；正文与 run id 见 `plan/RELEASE-M6.md` §二）。
 
-### v0.5.1 —— CI 首推修复（2026-10-27）
-
-- **只动 `.github/`**：`src/` 与 `pyproject.toml` 的代码面与 v0.5.0 相同（版本号除外）。
-- 首推实测暴露的三处 CI 配置缺陷（这正是 `plan/05` §四 #1 写"CI 待首推验证"的原因）：
-  1. CLI smoke 报 `No module named imageoracle` —— 本仓是 `src` 布局、不装包 → job 级 `PYTHONPATH=src`；
-  2. `windows-latest` 上门的四字节中文输出触发 `UnicodeEncodeError: 'charmap'` →
-     `PYTHONUTF8=1` + `PYTHONIOENCODING=utf-8`；
-  3. 零依赖断言把 `__main__`（解释器自身）与 `_distutils_hack`（setuptools site hook，3.10 上出现）
-     当成第三方 → 用 `python -S` 并显式排除 `__main__`；offline 镜像补 `ENV PYTHONPATH=/work/src`。
-- 修复后 `main` 的 CI 全绿（7/7 job）。v0.5.0 的 tag run 失败记录保留在 `plan/RELEASE-M6.md` §二，
-  **不删、不改写**已公开的历史；v0.5.0 的 Release 正文加一行"已被 v0.5.1 取代"。
-
-### 已知边界
+## 已知边界（全项目级，不随版本变化）
 
 - 不解码像素（硬约束）：所有"像素实际如何"的结论落 `gray` / `suspicion`。
 - PNG `iCCP` 压缩流首期**不解压** → `unknown: compressed_profile_not_inspected`。

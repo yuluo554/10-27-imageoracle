@@ -30,8 +30,8 @@
 
 | 步骤 | 事实 | 状态 |
 |---|---|---|
-| 1. `commit` | `312d8ea`（M1–M6 交付，48 文件 / +8200 行）；`b92a767`（CI 配置修复，仅 `.github/`）；`<v0.5.1>`（版本与留档，本提交） | ✅ |
-| 2. `git tag -a` | `v0.5.0` → `312d8ea`；`v0.5.1` → `<v0.5.1>`（含 CI 修复） | ✅ |
+| 1. `commit` | `312d8ea`（M1–M6 交付，48 文件 / +8200 行）；`b92a767`（CI 配置修复，仅 `.github/`）；`0c82df1`（版本与留档，本提交） | ✅ |
+| 2. `git tag -a` | `v0.5.0` → `312d8ea`；`v0.5.1` → `0c82df1`（含 CI 修复） | ✅ |
 | 3. 建 GitHub 公开仓库 | <https://github.com/yuluo554/10-27-imageoracle>（`gh repo create --public`） | ✅ |
 | 4. `push` | `origin/main`（`312d8ea`→`b92a767`→…），`origin/v0.5.0`，`origin/v0.5.1` | ✅ |
 | 5. `git archive` 附件 | `v0.5.0`：`imageoracle-v0.5.0.tar.gz`，**215387 字节**，sha256 `30351fed8c7b77e1cd817d36999dab029effd5dedf69a78a1bcc476e5b4cf15c`（两次构建 `cmp` 逐字节相同）；`v0.5.1`：见下一行回填 | ✅ / ⬜ |
