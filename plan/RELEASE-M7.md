@@ -39,13 +39,13 @@ D9 CHANGELOG 段结构 / D7 与 D10 登记为未做（见下）。
 
 | 步骤 | 事实 | 状态 |
 |---|---|---|
-| 1. `commit` | 见下一行回填（提交信息以 `v0.5.2` 开头） | ⬜ |
-| 2. `git tag -a` | `v0.5.2` → 见上 | ⬜ |
-| 3. `push` | `origin/main`、`origin/v0.5.2` | ⬜ |
-| 4. `git archive` 附件 | `imageoracle-v0.5.2.tar.gz`，字节数与 sha256 见下一行回填；两次构建 `cmp` 逐字节相同 | ⬜ |
-| 5. `gh release create` | 正文写附件字节数与 sha256；`v0.5.2` 为 latest | ⬜ |
-| 6. Actions run id | push 后回填（7 条 check-run 应全 success 且**不带 Node20 注解**） | ⬜ |
-| 7. 下载件复验 | 从 Release 真下载 → sha256 与正文一致、`cmp` 与本地重建逐字节相同、解包后门与测试全绿 | ⬜ |
+| 1. `commit` | `aa8e6ef130ddcf6099f461a5304a2ba7fbb372c3`（提交信息以 `v0.5.2` 开头；16 文件 / +512 / −50） | ✅ |
+| 2. `git tag -a` | annotated，tag 对象 `cdaaab156f9b388b1ac9fdd47ebc4b80cab8628a`，剥壳指向 `aa8e6ef` | ✅ |
+| 3. `push` | `origin/main` `e20f6ec..aa8e6ef`；`origin/v0.5.2` 新推；`git ls-remote --tags origin` 见到 tag 对象与 `^{}` 剥壳两条 | ✅ |
+| 4. `git archive` 附件 | `imageoracle-v0.5.2.tar.gz` **226752 字节**，sha256 `c9afab4d014b27b9839a9b47a24d187d2c6016887dff355a2c6d59a8f6565239`；不带 `--prefix`；两次构建 `cmp` = BYTE_IDENTICAL；包内 84 条目 | ✅ |
+| 5. `gh release create` | https://github.com/yuluo554/10-27-imageoracle/releases/tag/v0.5.2 （非 draft / 非 prerelease；`/releases/latest` 返回 `v0.5.2`）；附件名与字节数同第 4 行 | ✅ |
+| 6. Actions run id | main push = `40681167828`，tag push = `40681227323`，两条 run 各 7 个 job 全 success；本提交的 check-run 共 14 条（2 run × 7）全 success；Node20 弃用注解：两条新 run 日志 `grep -c 'Node.js 20 is deprecated'` = **0**（日志 1897 / 2013 行，非空跑），负向对照旧 run `40533933285` = **7** | ✅ |
+| 7. 下载件复验 | `gh release download v0.5.2` → sha256 与正文一致；与 `git archive v0.5.2` 重建件 `cmp` = BYTE_IDENTICAL；解包（无 `.git`）`unittest` → **Ran 226 / OK**，布局门全绿 / 门自证 19/19 / 脱敏门 66 份全绿 / fixtures 一致；M6 留档的 v0.5.1 尖括号占位计数 = **0**；`发布动作待显式授权` = **1**（v0.5.2 条目里对旧措辞的引用，非陈旧断言）；CHANGELOG 已发布版本段 = 3 | ✅ |
 
 ## 三、第 7 阶段出口门覆盖对账
 
@@ -59,5 +59,5 @@ D9 CHANGELOG 段结构 / D7 与 D10 登记为未做（见下）。
 | 多平台原生构建 | 纯 Python、零第三方依赖，无交叉编译 | 不适用 |
 | Actions job 容器 + `--network none` | CI 用嵌套 `docker run --network none` 跑 offline 作业，不把 job 放容器里 | 实现 |
 | 安装面七面对账 | 只用 `pyproject.toml`（无 `setup.cfg` / `MANIFEST.in` / `setup.py`），面数少但逐条写清 | 实现 |
-| `POST_TAG` 范围 | `git diff --name-only v0.5.2..HEAD` 只允许 `plan/` `docs/` `tests/` `tools/` `README.md` `AGENTS.md` | 实现（待发布后核对） |
+| `POST_TAG` 范围 | `git diff --name-only v0.5.2..HEAD` 只允许 `plan/` `docs/` `tests/` `tools/` `README.md` `AGENTS.md` | 实现（已核对：v0.5.2 之后唯一提交只动 `plan/RELEASE-M7.md`） |
 | push 数 = run 数 | 每次 push 恰好一条 run；tag push 另起一条 | 实现（run id 见 §二 第 6 行） |
